@@ -1,0 +1,41 @@
+name: Build Jun Yadnap Trade System
+
+on:
+  schedule:
+    # 4:15pm AEST (UTC+10) = 06:15 UTC
+    # 4:15pm AEDT (UTC+11) = 05:15 UTC
+    # Run both times — script handles DST, second run just overwrites with same data
+    - cron: '15 5 * * 1-5'   # 4:15pm AEDT (daylight saving — Oct to Apr)
+    - cron: '15 6 * * 1-5'   # 4:15pm AEST (standard time — Apr to Oct)
+  workflow_dispatch:          # Allow manual trigger from GitHub Actions tab
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install yfinance pandas numpy
+
+      - name: Run build script
+        run: |
+          python scripts/build.py
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: gh-pages
+          commit_message: "Auto-update: ${{ github.run_id }}"
