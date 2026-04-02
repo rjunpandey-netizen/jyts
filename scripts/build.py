@@ -14,7 +14,6 @@ import numpy as np
 
 # ─── Timezone ────────────────────────────────────────────────────────────────
 def get_aest_now():
-    """Return current Melbourne time with DST awareness."""
     utc_now = datetime.now(timezone.utc)
     year = utc_now.year
     apr1 = datetime(year, 4, 1)
@@ -110,7 +109,7 @@ def get_signal(regime, price, sma20, sma250, bb_upper, bb_lower, rsi):
     return dict(action="HOLD CASH", gear=0, bboz=0, cash=100,
                 reason=f"Neutral zone. ASX within 1% of SMA250 ({ext250:+.1f}%). Waiting for clear direction.")
 
-# ─── Fetch Data ───────────────────────────────────────────────────────────────
+# ─── Fetch ASX Data ───────────────────────────────────────────────────────────
 def fetch_asx_data():
     print("Fetching ASX 200 data...")
     ticker = yf.Ticker("^AXJO")
@@ -118,8 +117,30 @@ def fetch_asx_data():
     df = df[["Close"]].copy()
     df.dropna(inplace=True)
     df.index = pd.to_datetime(df.index)
-    print(f"  Got {len(df)} days of data. Latest: {df.index[-1].date()} = {df['Close'].iloc[-1]:.0f}")
+    print(f"  Got {len(df)} days. Latest: {df.index[-1].date()} = {df['Close'].iloc[-1]:.0f}")
     return df
+
+# ─── Fetch ETF Data ───────────────────────────────────────────────────────────
+def fetch_etf_data():
+    print("Fetching GEAR and BBOZ data...")
+    gear_df, bboz_df = None, None
+    try:
+        g = yf.Ticker("GEAR.AX")
+        gear_df = g.history(period="2y", interval="1d")[["Close"]].copy()
+        gear_df.dropna(inplace=True)
+        gear_df.index = pd.to_datetime(gear_df.index).tz_localize(None)
+        print(f"  GEAR: {len(gear_df)} days")
+    except Exception as e:
+        print(f"  GEAR fetch failed: {e}")
+    try:
+        b = yf.Ticker("BBOZ.AX")
+        bboz_df = b.history(period="2y", interval="1d")[["Close"]].copy()
+        bboz_df.dropna(inplace=True)
+        bboz_df.index = pd.to_datetime(bboz_df.index).tz_localize(None)
+        print(f"  BBOZ: {len(bboz_df)} days")
+    except Exception as e:
+        print(f"  BBOZ fetch failed: {e}")
+    return gear_df, bboz_df
 
 # ─── Build Backtest ───────────────────────────────────────────────────────────
 def run_backtest(df):
@@ -131,14 +152,13 @@ def run_backtest(df):
 
     portfolio = 100000.0
     bh_base = closes.iloc[0]
-    equity = []
-    bh_equity = []
-    dd_series = []
+    equity, bh_equity, dd_series, labels = [], [], [], []
     peak = 100000.0
     wins = losses = 0
     prev_val = 100000.0
     regime_stats = {}
-    labels = []
+    regime_transitions = []
+    prev_regime = None
 
     for i in range(250, len(closes)):
         price = closes.iloc[i]
@@ -151,6 +171,15 @@ def run_backtest(df):
 
         regime = get_regime(price, s250, r)
         sig = get_signal(regime, price, s20, s250, bbu, bbl, r)
+
+        if regime != prev_regime and prev_regime is not None:
+            regime_transitions.append({
+                "date": closes.index[i].strftime("%d %b %Y"),
+                "from": prev_regime,
+                "to": regime,
+                "price": round(float(price))
+            })
+        prev_regime = regime
 
         daily_ret = (price - prev_price) / prev_price
         port_ret = 0.0
@@ -167,7 +196,6 @@ def run_backtest(df):
 
         if portfolio > peak: peak = portfolio
         dd = (portfolio - peak) / peak * 100
-
         bh_val = 100000 * (price / bh_base)
 
         if regime not in regime_stats:
@@ -193,26 +221,19 @@ def run_backtest(df):
     for r, s in regime_stats.items():
         sys_ret = (s["sys_end"] - s["sys_start"]) / s["sys_start"] * 100
         asx_ret = (s["asx_end"] - s["asx_start"]) / s["asx_start"] * 100
-        regime_rows.append({
-            "regime": r, "days": s["days"],
-            "sys_ret": round(sys_ret, 1), "asx_ret": round(asx_ret, 1)
-        })
+        regime_rows.append({"regime": r, "days": s["days"],
+                             "sys_ret": round(sys_ret, 1), "asx_ret": round(asx_ret, 1)})
 
     return {
-        "total_return": round(total_return, 1),
-        "cagr": round(cagr, 1),
-        "max_dd": round(max_dd, 1),
-        "win_rate": round(win_rate, 0),
-        "sharpe": round(sharpe, 2),
-        "labels": labels,
-        "equity": equity,
-        "bh_equity": bh_equity,
-        "drawdowns": dd_series,
-        "regime_rows": regime_rows
+        "total_return": round(total_return, 1), "cagr": round(cagr, 1),
+        "max_dd": round(max_dd, 1), "win_rate": round(win_rate, 0),
+        "sharpe": round(sharpe, 2), "labels": labels,
+        "equity": equity, "bh_equity": bh_equity, "drawdowns": dd_series,
+        "regime_rows": regime_rows, "regime_transitions": regime_transitions[-10:]
     }
 
-# ─── Build chart data ─────────────────────────────────────────────────────────
-def build_chart_data(df, n=120):
+# ─── Build Chart Data ─────────────────────────────────────────────────────────
+def build_chart_data(df, gear_df, bboz_df, n=120):
     closes = df["Close"]
     sma20 = calc_sma(closes, 20)
     sma250 = calc_sma(closes, 250)
@@ -223,15 +244,35 @@ def build_chart_data(df, n=120):
         return [round(v, 2) if not pd.isna(v) else None for v in series.iloc[-n:]]
 
     labels = [d.strftime("%d %b") for d in closes.index[-n:]]
+    asx_dates = closes.index[-n:]
+
+    # Normalise ASX to 100
+    raw_closes = fmt(closes)
+    base_asx = next((v for v in raw_closes if v), 1)
+    asx_norm = [round(v / base_asx * 100, 2) if v else None for v in raw_closes]
+
+    def get_etf_norm(etf_df):
+        if etf_df is None or len(etf_df) == 0:
+            return []
+        vals = []
+        for d in asx_dates:
+            d_n = d.tz_localize(None) if hasattr(d, 'tz_localize') and d.tzinfo else d
+            m = etf_df.index[etf_df.index <= d_n]
+            vals.append(round(float(etf_df.loc[m[-1], "Close"]), 2) if len(m) > 0 else None)
+        base = next((v for v in vals if v), None)
+        if not base:
+            return []
+        return [round(v / base * 100, 2) if v else None for v in vals]
+
     return {
         "labels": labels,
-        "closes": fmt(closes),
+        "closes": raw_closes,
         "sma20": fmt(sma20),
         "sma250": fmt(sma250),
         "rsi": fmt(rsi),
-        "bb_upper": fmt(bb_upper),
-        "bb_mid": fmt(bb_mid),
-        "bb_lower": fmt(bb_lower),
+        "asx_norm": asx_norm,
+        "gear_norm": get_etf_norm(gear_df),
+        "bboz_norm": get_etf_norm(bboz_df),
     }
 
 # ─── Generate HTML ────────────────────────────────────────────────────────────
@@ -240,30 +281,56 @@ def generate_html(signal_data, chart_data, backtest_data, build_time, tz_name):
     cd = chart_data
     sd = signal_data
 
+    # Regime colours
+    regime = sd["regime"]
+    if "STRONG UP" in regime:
+        rc, rbg, rborder = "#15803d", "#f0fdf4", "#bbf7d0"
+    elif "UP" in regime:
+        rc, rbg, rborder = "#1d4ed8", "#eff6ff", "#bfdbfe"
+    elif "STRONG DOWN" in regime:
+        rc, rbg, rborder = "#b91c1c", "#fef2f2", "#fecaca"
+    elif "DOWN" in regime:
+        rc, rbg, rborder = "#c2410c", "#fff7ed", "#fed7aa"
+    else:
+        rc, rbg, rborder = "#475569", "#f8fafc", "#e2e8f0"
+
+    action_display = sd["action"]
+    if "GEAR" in action_display:
+        action_display = action_display.replace("GEAR", '<span style="color:#1d4ed8;font-weight:700">GEAR</span>')
+    elif "BBOZ" in action_display:
+        action_display = action_display.replace("BBOZ", '<span style="color:#b91c1c;font-weight:700">BBOZ</span>')
+
+    # Regime table rows
     bt_regime_rows = ""
     for r in bt["regime_rows"]:
         etf = "GEAR" if "UP" in r["regime"] else "BBOZ" if "DOWN" in r["regime"] else "CASH"
-        badge = "badge-g" if "UP" in r["regime"] else "badge-r" if "DOWN" in r["regime"] else "badge-n"
-        sys_cls = "pnl-g" if r["sys_ret"] >= 0 else "pnl-r"
-        asx_cls = "pnl-g" if r["asx_ret"] >= 0 else "pnl-r"
-        better = "badge-g\">Outperformed" if r["sys_ret"] >= r["asx_ret"] else "badge-r\">Underperformed"
+        bc = "badge-up" if "UP" in r["regime"] else "badge-dn" if "DOWN" in r["regime"] else "badge-nu"
+        sc = "pos" if r["sys_ret"] >= 0 else "neg"
+        ac = "pos" if r["asx_ret"] >= 0 else "neg"
+        res = "result-win\">Outperformed" if r["sys_ret"] >= r["asx_ret"] else "result-lose\">Underperformed"
         bt_regime_rows += f"""<tr>
           <td>{r["regime"]}</td><td>{r["days"]}d</td>
-          <td><span class="badge {badge}">{etf}</span></td>
-          <td class="{sys_cls}">{r["sys_ret"]:+.1f}%</td>
-          <td class="{asx_cls}">{r["asx_ret"]:+.1f}%</td>
-          <td><span class="badge {better}</span></td>
-        </tr>"""
+          <td><span class="badge {bc}">{etf}</span></td>
+          <td class="{sc}">{r["sys_ret"]:+.1f}%</td>
+          <td class="{ac}">{r["asx_ret"]:+.1f}%</td>
+          <td><span class="result {res}</span></td></tr>"""
 
-    action_html = sd["action"]
-    if "GEAR" in sd["action"]:
-        action_html = sd["action"].replace("GEAR", '<span class="ticker-g">GEAR</span>')
-    elif "BBOZ" in sd["action"]:
-        action_html = sd["action"].replace("BBOZ", '<span class="ticker-r">BBOZ</span>')
+    # Transition rows
+    trans_rows = ""
+    for t in reversed(bt.get("regime_transitions", [])):
+        fc = "badge-up" if "UP" in t["from"] else "badge-dn" if "DOWN" in t["from"] else "badge-nu"
+        tc = "badge-up" if "UP" in t["to"] else "badge-dn" if "DOWN" in t["to"] else "badge-nu"
+        trans_rows += f"""<tr>
+          <td style="font-family:'DM Mono',monospace;font-size:12px">{t["date"]}</td>
+          <td><span class="badge {fc}">{t["from"]}</span></td>
+          <td style="color:#94a3b8;font-size:16px">→</td>
+          <td><span class="badge {tc}">{t["to"]}</span></td>
+          <td style="font-family:'DM Mono',monospace">{t["price"]:,}</td></tr>"""
+    if not trans_rows:
+        trans_rows = '<tr><td colspan="5" style="color:#94a3b8;text-align:center;padding:20px;font-family:DM Mono,monospace;font-size:12px">No transitions recorded yet</td></tr>'
 
-    gear_color = "#00d4a0" if sd["gear"] > 0 else "#333"
-    bboz_color = "#ff5e5e" if sd["bboz"] > 0 else "#333"
-    regime_accent = "#00d4a0" if "UP" in sd["regime"] else "#ff5e5e" if "DOWN" in sd["regime"] else "#8a95a8"
+    bt_rc = "#15803d" if bt["total_return"] >= 0 else "#b91c1c"
+    bt_cc = "#15803d" if bt["cagr"] >= 0 else "#b91c1c"
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -271,138 +338,178 @@ def generate_html(signal_data, chart_data, backtest_data, build_time, tz_name):
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jun Yadnap Trade System</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
-:root {{
-  --bg:#0a0e14;--bg2:#111720;--bg3:#161d28;
-  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
-  --text:#e8edf5;--text2:#8a95a8;--text3:#4a5568;
-  --green:#00d4a0;--green2:#00a37a;--green-dim:rgba(0,212,160,0.12);
-  --red:#ff5e5e;--red-dim:rgba(255,94,94,0.12);
-  --amber:#f0a832;--amber-dim:rgba(240,168,50,0.12);
-  --blue:#4a9eff;--blue-dim:rgba(74,158,255,0.1);
-  --radius:12px;--radius-sm:8px;
-}}
 *{{box-sizing:border-box;margin:0;padding:0}}
+:root{{
+  --bg:#f1f5f9;--bg2:#ffffff;--bg3:#f8fafc;
+  --border:#e2e8f0;--border2:#cbd5e1;
+  --text:#0f172a;--text2:#475569;--text3:#94a3b8;
+  --green:#15803d;--green-bg:#f0fdf4;
+  --red:#b91c1c;--red-bg:#fef2f2;
+  --blue:#1d4ed8;--blue-bg:#eff6ff;
+  --amber:#b45309;--amber-bg:#fffbeb;
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 1px 3px rgba(0,0,0,0.07),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+}}
 body{{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh}}
-#lock-screen{{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px}}
+
+/* Lock */
+#lock-screen{{position:fixed;inset:0;background:#0f172a;z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:28px}}
 #lock-screen.hidden{{display:none}}
-.lock-logo{{font-family:'Playfair Display',serif;font-size:28px;text-align:center;line-height:1.3}}
-.lock-logo span{{color:var(--green)}}
-.lock-sub{{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:2px;text-transform:uppercase}}
-.lock-form{{display:flex;flex-direction:column;gap:12px;width:280px}}
-.lock-input{{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 16px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .15s}}
-.lock-input:focus{{border-color:var(--green)}}
-.lock-btn{{background:var(--green);color:#000;border:none;padding:12px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;cursor:pointer;transition:background .15s}}
-.lock-btn:hover{{background:var(--green2)}}
-.lock-error{{font-size:12px;color:var(--red);text-align:center;display:none;font-family:'DM Mono',monospace}}
-.app{{display:grid;grid-template-columns:220px 1fr;min-height:100vh}}
-.sidebar{{background:var(--bg2);border-right:1px solid var(--border);padding:0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}}
-.main{{padding:28px 32px;overflow-y:auto}}
-.logo-area{{padding:24px 20px 20px;border-bottom:1px solid var(--border)}}
-.logo-name{{font-family:'Playfair Display',serif;font-size:16px;color:var(--text);line-height:1.3}}
-.logo-sub{{font-size:10px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px;font-family:'DM Mono',monospace}}
-.logo-dot{{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px;animation:blink 2s ease-in-out infinite}}
-@keyframes blink{{0%,100%{{opacity:1}}50%{{opacity:0.3}}}}
-.signal-pill{{margin:16px 12px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius)}}
-.signal-pill-label{{font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:6px}}
-.signal-pill-action{{font-size:15px;font-weight:500;color:{regime_accent};font-family:'DM Mono',monospace}}
-.signal-pill-regime{{font-size:11px;color:var(--text2);margin-top:3px}}
+.lock-logo{{font-family:'Fraunces',serif;font-size:34px;color:#f8fafc;text-align:center;line-height:1.2}}
+.lock-logo em{{color:#93c5fd;font-style:italic}}
+.lock-sub{{font-size:10px;color:#475569;font-family:'DM Mono',monospace;letter-spacing:2px;text-transform:uppercase}}
+.lock-form{{display:flex;flex-direction:column;gap:12px;width:300px}}
+.lock-input{{background:#1e293b;border:1px solid #334155;border-radius:var(--radius-sm);padding:13px 16px;color:#f1f5f9;font-size:14px;outline:none;transition:border-color .15s;font-family:'DM Sans',sans-serif}}
+.lock-input:focus{{border-color:#93c5fd}}
+.lock-btn{{background:#2563eb;color:#fff;border:none;padding:13px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;transition:background .15s}}
+.lock-btn:hover{{background:#1d4ed8}}
+.lock-error{{font-size:12px;color:#f87171;text-align:center;display:none;font-family:'DM Mono',monospace}}
+
+/* Layout */
+.app{{display:grid;grid-template-columns:240px 1fr;min-height:100vh}}
+.sidebar{{background:#0f172a;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}}
+.main{{padding:32px 40px;overflow-y:auto}}
+
+/* Sidebar */
+.logo-area{{padding:28px 20px 22px;border-bottom:1px solid #1e293b}}
+.logo-name{{font-family:'Fraunces',serif;font-size:18px;color:#f8fafc;line-height:1.4}}
+.logo-name em{{color:#93c5fd;font-style:italic}}
+.logo-sub{{font-size:10px;color:#334155;letter-spacing:1.5px;text-transform:uppercase;margin-top:6px;font-family:'DM Mono',monospace}}
+.dot{{width:7px;height:7px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:6px;animation:pulse 2s ease-in-out infinite}}
+@keyframes pulse{{0%,100%{{opacity:1;transform:scale(1)}}50%{{opacity:0.3;transform:scale(0.75)}}}}
+.sig-pill{{margin:16px 12px;padding:14px 16px;background:#1e293b;border-radius:var(--radius);border:1px solid #334155}}
+.sig-pill-label{{font-size:10px;color:#475569;letter-spacing:1px;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:8px}}
+.sig-pill-action{{font-size:15px;font-weight:600;color:{rc};font-family:'DM Mono',monospace}}
+.sig-pill-regime{{font-size:11px;color:#64748b;margin-top:3px}}
 .nav-section{{padding:16px 12px 8px}}
-.nav-label{{font-size:10px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Mono',monospace;padding:0 8px;margin-bottom:6px}}
-.nav-item{{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);cursor:pointer;color:var(--text2);font-size:13px;transition:all .15s;margin-bottom:2px}}
-.nav-item:hover{{background:rgba(255,255,255,0.05);color:var(--text)}}
-.nav-item.active{{background:var(--green-dim);color:var(--green)}}
-.nav-icon{{font-size:14px;width:18px;text-align:center}}
-.sidebar-footer{{margin-top:auto;padding:16px 12px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);line-height:1.8}}
+.nav-label{{font-size:10px;color:#1e293b;letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Mono',monospace;padding:0 8px;margin-bottom:8px}}
+.nav-item{{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);cursor:pointer;color:#475569;font-size:13px;transition:all .15s;margin-bottom:2px}}
+.nav-item:hover{{background:#1e293b;color:#e2e8f0}}
+.nav-item.active{{background:#1e3a5f;color:#93c5fd;font-weight:500}}
+.nav-icon{{font-size:13px;width:18px;text-align:center}}
+.sb-footer{{margin-top:auto;padding:16px;border-top:1px solid #1e293b;font-size:11px;color:#334155;line-height:1.9;font-family:'DM Mono',monospace}}
+
+/* Tabs */
 .tab{{display:none}}.tab.active{{display:block}}
-.page-header{{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}}
-.page-title{{font-family:'Playfair Display',serif;font-size:26px;color:var(--text)}}
+
+/* Page header */
+.page-header{{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px}}
+.page-title{{font-family:'Fraunces',serif;font-size:28px;color:var(--text)}}
 .page-sub{{font-size:12px;color:var(--text3);margin-top:4px;font-family:'DM Mono',monospace}}
-.card{{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px}}
-.card-title{{font-size:11px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:14px}}
-.signal-main{{background:var(--bg2);border:1px solid var(--border);border-top:2px solid {regime_accent};border-radius:var(--radius);padding:24px;margin-bottom:20px}}
-.signal-regime{{font-size:11px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:8px}}
-.signal-action{{font-size:32px;font-weight:300;color:var(--text);letter-spacing:-0.5px}}
-.ticker-g{{color:var(--green);font-weight:500}}.ticker-r{{color:var(--red);font-weight:500}}
-.signal-reason{{font-size:13px;color:var(--text2);margin-top:10px;line-height:1.7;max-width:580px}}
-.alloc-grid{{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}}
-.alloc-box{{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px}}
-.alloc-name{{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:6px;letter-spacing:1px}}
-.alloc-pct{{font-size:28px;font-weight:300;letter-spacing:-1px}}
-.alloc-pct.g{{color:var(--green)}}.alloc-pct.r{{color:var(--red)}}.alloc-pct.w{{color:var(--text2)}}
-.alloc-bar{{height:3px;background:var(--bg);border-radius:2px;margin-top:8px}}
-.alloc-fill{{height:100%;border-radius:2px}}
-.metrics-row{{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}}
-.metric-box{{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px}}
-.metric-label{{font-size:10px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:8px}}
-.metric-val{{font-size:22px;font-weight:300;color:var(--text);font-family:'DM Mono',monospace;letter-spacing:-0.5px}}
-.metric-val.g{{color:var(--green)}}.metric-val.r{{color:var(--red)}}.metric-val.a{{color:var(--amber)}}
-.metric-sub{{font-size:11px;color:var(--text3);margin-top:4px}}
-.chart-card{{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px}}
-.chart-header{{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}}
-.chart-title{{font-size:11px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Mono',monospace}}
-.legend{{display:flex;gap:16px;flex-wrap:wrap}}
+.build-badge{{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;background:var(--bg2);border:1px solid var(--border);padding:6px 14px;border-radius:20px;box-shadow:var(--shadow)}}
+
+/* Signal card */
+.signal-card{{background:{rbg};border:1px solid {rborder};border-left:4px solid {rc};border-radius:var(--radius);padding:24px 28px;margin-bottom:24px;box-shadow:var(--shadow)}}
+.signal-regime-tag{{font-size:11px;color:{rc};letter-spacing:2px;text-transform:uppercase;font-family:'DM Mono',monospace;font-weight:500;margin-bottom:8px}}
+.signal-action{{font-family:'Fraunces',serif;font-size:36px;color:var(--text);line-height:1;margin-bottom:10px}}
+.signal-reason{{font-size:13px;color:var(--text2);line-height:1.7;max-width:600px}}
+.alloc-row{{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}}
+.alloc-chip{{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 16px;min-width:105px;box-shadow:var(--shadow)}}
+.alloc-chip-name{{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace;margin-bottom:4px}}
+.alloc-chip-val{{font-size:22px;font-weight:700;font-family:'DM Mono',monospace}}
+.av-gear{{color:var(--blue)}}.av-bboz{{color:var(--red)}}.av-cash{{color:var(--text2)}}
+
+/* Metric cards */
+.metrics-row{{display:grid;gap:14px;margin-bottom:24px}}
+.m5{{grid-template-columns:repeat(5,1fr)}}.m4{{grid-template-columns:repeat(4,1fr)}}.m3{{grid-template-columns:repeat(3,1fr)}}
+.metric-card{{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow)}}
+.metric-label{{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;font-family:'DM Mono',monospace;margin-bottom:10px}}
+.metric-val{{font-size:24px;font-weight:700;color:var(--text);font-family:'DM Mono',monospace;letter-spacing:-0.5px}}
+.metric-val.pos{{color:var(--green)}}.metric-val.neg{{color:var(--red)}}.metric-val.neu{{color:var(--amber)}}
+.metric-sub{{font-size:11px;color:var(--text3);margin-top:5px}}
+
+/* Chart cards */
+.card{{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:24px;box-shadow:var(--shadow)}}
+.card-header{{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px}}
+.card-title{{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;font-family:'DM Mono',monospace;font-weight:500}}
+.legend{{display:flex;gap:14px;flex-wrap:wrap}}
 .legend-item{{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)}}
-.legend-dot{{width:8px;height:8px;border-radius:2px;flex-shrink:0}}
+.legend-line{{width:14px;height:2px;border-radius:2px}}
+
+/* Section title */
+.section-title{{font-family:'Fraunces',serif;font-size:19px;color:var(--text);margin-bottom:16px;margin-top:4px}}
+
+/* Perf summary */
+.perf-grid{{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}}
+.perf-card{{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow)}}
+.perf-label{{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace;margin-bottom:6px}}
+.perf-val{{font-size:20px;font-weight:700;font-family:'DM Mono',monospace}}
+.perf-val.pos{{color:var(--green)}}.perf-val.neg{{color:var(--red)}}
+
+/* Tables */
 .data-table{{width:100%;border-collapse:collapse;font-size:13px}}
-.data-table th{{font-size:10px;color:var(--text3);text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:1px;font-weight:400;font-family:'DM Mono',monospace}}
-.data-table td{{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}}
+.data-table th{{font-size:10px;color:var(--text3);text-align:left;padding:9px 12px;border-bottom:2px solid var(--border);text-transform:uppercase;letter-spacing:1px;font-weight:500;font-family:'DM Mono',monospace}}
+.data-table td{{padding:11px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}}
 .data-table tr:last-child td{{border-bottom:none}}
-.data-table tr:hover td{{background:rgba(255,255,255,0.02)}}
-.buy-tag{{color:var(--green);font-weight:500;font-family:'DM Mono',monospace;font-size:11px}}
-.sell-tag{{color:var(--red);font-weight:500;font-family:'DM Mono',monospace;font-size:11px}}
-.pnl-g{{color:var(--green);font-family:'DM Mono',monospace}}
-.pnl-r{{color:var(--red);font-family:'DM Mono',monospace}}
-.badge{{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:500;font-family:'DM Mono',monospace;letter-spacing:0.5px}}
-.badge-g{{background:var(--green-dim);color:var(--green)}}
-.badge-r{{background:var(--red-dim);color:var(--red)}}
-.badge-a{{background:var(--amber-dim);color:var(--amber)}}
-.badge-n{{background:rgba(255,255,255,0.06);color:var(--text2)}}
-.form-grid{{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}}
+.data-table tr:hover td{{background:var(--bg3)}}
+.pos{{color:var(--green);font-family:'DM Mono',monospace}}
+.neg{{color:var(--red);font-family:'DM Mono',monospace}}
+
+/* Badges */
+.badge{{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600;font-family:'DM Mono',monospace;letter-spacing:.5px}}
+.badge-up{{background:#dbeafe;color:#1e40af}}
+.badge-dn{{background:#fee2e2;color:#991b1b}}
+.badge-nu{{background:#f1f5f9;color:#475569}}
+.result{{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600;font-family:'DM Mono',monospace}}
+.result-win{{background:#dcfce7;color:#166534}}
+.result-lose{{background:#fee2e2;color:#991b1b}}
+
+/* Action tags */
+.buy-tag{{color:var(--blue);font-weight:600;font-family:'DM Mono',monospace;font-size:11px}}
+.sell-tag{{color:var(--red);font-weight:600;font-family:'DM Mono',monospace;font-size:11px}}
+.hold-tag{{color:var(--text3);font-weight:600;font-family:'DM Mono',monospace;font-size:11px}}
+
+/* Form */
+.form-grid{{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}}
 .form-group{{display:flex;flex-direction:column;gap:6px}}
-.form-label{{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase}}
-.form-input,.form-select{{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;width:100%;outline:none;transition:border-color .15s}}
-.form-input:focus,.form-select:focus{{border-color:var(--green)}}
-.form-select option{{background:var(--bg2)}}
-.btn-action{{background:var(--green);color:#000;border:none;padding:10px 20px;border-radius:var(--radius-sm);font-size:13px;cursor:pointer;font-weight:500;transition:all .15s}}
-.btn-action:hover{{background:var(--green2)}}
-.btn-outline{{background:transparent;border:1px solid var(--border2);color:var(--text2);padding:10px 20px;border-radius:var(--radius-sm);font-size:13px;cursor:pointer;transition:all .15s;margin-left:8px}}
-.btn-outline:hover{{border-color:var(--text2);color:var(--text)}}
+.form-label{{font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;font-weight:500}}
+.form-input,.form-select{{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 13px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;width:100%;outline:none;transition:border-color .15s}}
+.form-input:focus,.form-select:focus{{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}}
+.btn-primary{{background:#0f172a;color:#fff;border:none;padding:11px 22px;border-radius:var(--radius-sm);font-size:13px;cursor:pointer;font-weight:600;transition:background .15s}}
+.btn-primary:hover{{background:#1e293b}}
+.btn-ghost{{background:transparent;border:1px solid var(--border2);color:var(--text2);padding:11px 22px;border-radius:var(--radius-sm);font-size:13px;cursor:pointer;transition:all .15s;margin-left:8px}}
+.btn-ghost:hover{{border-color:var(--text);color:var(--text)}}
+.btn-del{{background:none;border:none;cursor:pointer;color:var(--text3);font-size:15px;padding:4px 7px;border-radius:6px;transition:all .15s;line-height:1}}
+.btn-del:hover{{color:var(--red);background:var(--red-bg)}}
+
+/* Info / warn */
+.info-box{{background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--radius-sm);padding:12px 16px;font-size:12px;color:#1e40af;line-height:1.7;margin-bottom:16px}}
+.warn-box{{background:#fffbeb;border:1px solid #fde68a;border-radius:var(--radius-sm);padding:12px 16px;font-size:12px;color:var(--amber);line-height:1.7;margin-bottom:16px}}
+
+/* Strat cards */
 .strat-grid{{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}}
-.strat-card{{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;transition:border-color .15s}}
-.strat-card:hover{{border-color:var(--border2)}}
+.strat-card{{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;transition:box-shadow .15s}}
+.strat-card:hover{{box-shadow:var(--shadow-md)}}
 .strat-header{{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}}
-.strat-name{{font-size:13px;font-weight:500;color:var(--text)}}
+.strat-name{{font-size:13px;font-weight:600;color:var(--text)}}
 .strat-body{{font-size:12px;color:var(--text2);line-height:1.7}}
-.strat-rule{{margin-top:8px;font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)}}
-.bt-summary{{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}}
-.bt-metric{{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}}
-.bt-metric-val{{font-size:24px;font-weight:300;font-family:'DM Mono',monospace;letter-spacing:-1px}}
-.bt-metric-label{{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-top:6px}}
-.info-box{{background:var(--blue-dim);border:1px solid rgba(74,158,255,0.2);border-radius:var(--radius-sm);padding:12px 16px;font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:16px}}
-.warn-box{{background:var(--amber-dim);border:1px solid rgba(240,168,50,0.2);border-radius:var(--radius-sm);padding:12px 16px;font-size:12px;color:var(--amber);line-height:1.7;margin-bottom:16px}}
-.updated-badge{{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;background:var(--bg3);border:1px solid var(--border);padding:6px 12px;border-radius:var(--radius-sm)}}
-::-webkit-scrollbar{{width:4px}}
-::-webkit-scrollbar-thumb{{background:var(--border2);border-radius:2px}}
+.strat-rule{{margin-top:8px;font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);line-height:1.6}}
+
+::-webkit-scrollbar{{width:5px}}
+::-webkit-scrollbar-track{{background:var(--bg3)}}
+::-webkit-scrollbar-thumb{{background:var(--border2);border-radius:3px}}
+
 @media(max-width:768px){{
   .app{{grid-template-columns:1fr}}
-  .sidebar{{position:fixed;bottom:0;left:0;right:0;height:auto;flex-direction:row;z-index:100;border-right:none;border-top:1px solid var(--border);overflow-x:auto}}
-  .logo-area,.signal-pill,.sidebar-footer,.nav-label{{display:none}}
-  .nav-section{{display:flex;flex-direction:row;padding:8px}}
-  .nav-item{{flex-direction:column;gap:4px;font-size:10px;padding:8px 12px}}
+  .sidebar{{position:fixed;bottom:0;left:0;right:0;height:auto;flex-direction:row;z-index:100;border-top:1px solid #1e293b;overflow-x:auto}}
+  .logo-area,.sig-pill,.sb-footer,.nav-label{{display:none}}
+  .nav-section{{display:flex;flex-direction:row;padding:6px}}
+  .nav-item{{flex-direction:column;gap:3px;font-size:9px;padding:8px 10px}}
   .main{{padding:16px;padding-bottom:80px}}
-  .metrics-row,.bt-summary{{grid-template-columns:repeat(2,1fr)}}
-  .strat-grid,.form-grid{{grid-template-columns:1fr}}
+  .m5,.m4,.metrics-row{{grid-template-columns:repeat(2,1fr)}}
+  .perf-grid,.strat-grid,.form-grid{{grid-template-columns:1fr}}
 }}
 </style>
 </head>
 <body>
 
-<!-- Lock Screen -->
+<!-- Lock -->
 <div id="lock-screen">
-  <div class="lock-logo">Jun <span>Yadnap</span><br>Trade System</div>
+  <div class="lock-logo">Jun <em>Yadnap</em><br>Trade System</div>
   <div class="lock-sub">ASX Systematic Trading</div>
   <div class="lock-form">
     <input class="lock-input" type="password" id="lock-pw" placeholder="Enter password" onkeydown="if(event.key==='Enter')unlock()">
@@ -412,16 +519,17 @@ body{{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fo
 </div>
 
 <div class="app" id="app-content" style="display:none">
+
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="logo-area">
-    <div class="logo-name">Jun Yadnap<br>Trade System</div>
-    <div class="logo-sub"><span class="logo-dot"></span>ASX Auto-Updated</div>
+    <div class="logo-name">Jun <em>Yadnap</em><br>Trade System</div>
+    <div class="logo-sub"><span class="dot"></span>ASX Auto-Updated</div>
   </div>
-  <div class="signal-pill">
-    <div class="signal-pill-label">Current signal</div>
-    <div class="signal-pill-action">{sd["action"]}</div>
-    <div class="signal-pill-regime">{sd["regime"]}</div>
+  <div class="sig-pill">
+    <div class="sig-pill-label">Current Signal</div>
+    <div class="sig-pill-action">{sd["action"]}</div>
+    <div class="sig-pill-regime">{sd["regime"]}</div>
   </div>
   <div class="nav-section">
     <div class="nav-label">Navigation</div>
@@ -431,7 +539,7 @@ body{{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fo
     <div class="nav-item" onclick="showTab('strategies',this)"><span class="nav-icon">◇</span> Strategies</div>
     <div class="nav-item" onclick="showTab('guide',this)"><span class="nav-icon">◌</span> How to Use</div>
   </div>
-  <div class="sidebar-footer">
+  <div class="sb-footer">
     Built: {build_time} {tz_name}<br>
     Auto-updates 4:15pm daily<br><br>
     Not financial advice.<br>
@@ -442,204 +550,266 @@ body{{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fo
 <!-- MAIN -->
 <main class="main">
 
-<!-- DASHBOARD -->
+<!-- ══════════ DASHBOARD ══════════ -->
 <div id="tab-dashboard" class="tab active">
   <div class="page-header">
     <div>
       <div class="page-title">Dashboard</div>
-      <div class="page-sub">Last updated: {build_time} {tz_name}</div>
+      <div class="page-sub">Updated {build_time} {tz_name}</div>
     </div>
-    <div class="updated-badge">Auto-updates 4:15pm AEST/AEDT</div>
+    <div class="build-badge">Auto-updates 4:15pm AEST/AEDT</div>
   </div>
 
-  <div class="signal-main">
-    <div class="signal-regime">REGIME: {sd["regime"]}</div>
-    <div class="signal-action">{action_html}</div>
+  <div class="signal-card">
+    <div class="signal-regime-tag">⬤ {sd["regime"]}</div>
+    <div class="signal-action">{action_display}</div>
     <div class="signal-reason">{sd["reason"]}</div>
-    <div class="alloc-grid">
-      <div class="alloc-box">
-        <div class="alloc-name">GEAR — Long</div>
-        <div class="alloc-pct g">{sd["gear"]}%</div>
-        <div class="alloc-bar"><div class="alloc-fill" style="width:{sd["gear"]}%;background:var(--green)"></div></div>
-      </div>
-      <div class="alloc-box">
-        <div class="alloc-name">BBOZ — Short</div>
-        <div class="alloc-pct r">{sd["bboz"]}%</div>
-        <div class="alloc-bar"><div class="alloc-fill" style="width:{sd["bboz"]}%;background:var(--red)"></div></div>
-      </div>
-      <div class="alloc-box">
-        <div class="alloc-name">Cash</div>
-        <div class="alloc-pct w">{sd["cash"]}%</div>
-        <div class="alloc-bar"><div class="alloc-fill" style="width:{sd["cash"]}%;background:var(--text3)"></div></div>
-      </div>
+    <div class="alloc-row">
+      <div class="alloc-chip"><div class="alloc-chip-name">GEAR — Long</div><div class="alloc-chip-val av-gear">{sd["gear"]}%</div></div>
+      <div class="alloc-chip"><div class="alloc-chip-name">BBOZ — Short</div><div class="alloc-chip-val av-bboz">{sd["bboz"]}%</div></div>
+      <div class="alloc-chip"><div class="alloc-chip-name">Cash</div><div class="alloc-chip-val av-cash">{sd["cash"]}%</div></div>
     </div>
   </div>
 
-  <div class="metrics-row" style="grid-template-columns:repeat(4,1fr)">
-    <div class="metric-box">
+  <div class="metrics-row m4">
+    <div class="metric-card">
       <div class="metric-label">ASX 200</div>
       <div class="metric-val">{sd["price"]:,.0f}</div>
-      <div class="metric-sub" style="color:{'var(--green)' if sd['change'] >= 0 else 'var(--red)'}">{sd["change"]:+.2f}% today</div>
+      <div class="metric-sub" style="color:{'var(--green)' if sd['change']>=0 else 'var(--red)'}">{sd["change"]:+.2f}% today</div>
     </div>
-    <div class="metric-box">
+    <div class="metric-card">
       <div class="metric-label">RSI (14)</div>
-      <div class="metric-val {'g' if sd['rsi'] > 65 else 'r' if sd['rsi'] < 35 else ''}">{sd["rsi"]:.1f}</div>
-      <div class="metric-sub">{"Overbought" if sd["rsi"] > 70 else "Oversold" if sd["rsi"] < 30 else "Neutral"}</div>
+      <div class="metric-val {'pos' if sd['rsi']>60 else 'neg' if sd['rsi']<40 else ''}">{sd["rsi"]:.1f}</div>
+      <div class="metric-sub">{"Overbought" if sd["rsi"]>70 else "Oversold" if sd["rsi"]<30 else "Neutral"}</div>
     </div>
-    <div class="metric-box">
+    <div class="metric-card">
       <div class="metric-label">vs SMA 250</div>
-      <div class="metric-val {'g' if sd['ext250'] >= 0 else 'r'}">{sd["ext250"]:+.1f}%</div>
+      <div class="metric-val {'pos' if sd['ext250']>=0 else 'neg'}">{sd["ext250"]:+.1f}%</div>
       <div class="metric-sub">SMA250: {sd["sma250"]:,.0f}</div>
     </div>
-    <div class="metric-box">
+    <div class="metric-card">
       <div class="metric-label">vs SMA 20</div>
-      <div class="metric-val {'g' if sd['ext20'] >= 0 else 'r'}">{sd["ext20"]:+.1f}%</div>
+      <div class="metric-val {'pos' if sd['ext20']>=0 else 'neg'}">{sd["ext20"]:+.1f}%</div>
       <div class="metric-sub">SMA20: {sd["sma20"]:,.0f}</div>
     </div>
   </div>
 
-  <div class="chart-card">
-    <div class="chart-header">
-      <div class="chart-title">ASX 200 — Price with SMA20 & SMA250</div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">ASX 200 — Price with SMA20 &amp; SMA250</div>
       <div class="legend">
-        <div class="legend-item"><div class="legend-dot" style="background:#00d4a0"></div>ASX 200</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#f0a832"></div>SMA 20</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#ff5e5e"></div>SMA 250</div>
+        <div class="legend-item"><div class="legend-line" style="background:#0f172a"></div>ASX 200</div>
+        <div class="legend-item"><div class="legend-line" style="background:#f59e0b;border-top:2px dashed #f59e0b;background:none"></div>SMA 20</div>
+        <div class="legend-item"><div class="legend-line" style="background:#ef4444"></div>SMA 250</div>
       </div>
     </div>
     <div style="position:relative;height:280px"><canvas id="priceChart"></canvas></div>
   </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
-    <div class="chart-card" style="margin-bottom:0">
-      <div class="chart-header"><div class="chart-title">RSI (14)</div></div>
-      <div style="position:relative;height:160px"><canvas id="rsiChart"></canvas></div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">RSI (14)</div>
+      <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">Overbought &gt;70 · Oversold &lt;30</div>
     </div>
-    <div class="chart-card" style="margin-bottom:0">
-      <div class="chart-header"><div class="chart-title">Bollinger Bands</div></div>
-      <div style="position:relative;height:160px"><canvas id="bbChart"></canvas></div>
+    <div style="position:relative;height:160px"><canvas id="rsiChart"></canvas></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Equity Curve vs GEAR Benchmark (Normalised to 100)</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-line" style="background:#2563eb"></div>ASX 200</div>
+        <div class="legend-item"><div class="legend-line" style="background:#15803d"></div>GEAR.AX</div>
+      </div>
     </div>
+    <div style="position:relative;height:220px"><canvas id="gearChart"></canvas></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Equity Curve vs BBOZ Benchmark (Normalised to 100)</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-line" style="background:#2563eb"></div>ASX 200</div>
+        <div class="legend-item"><div class="legend-line" style="background:#b91c1c"></div>BBOZ.AX</div>
+      </div>
+    </div>
+    <div style="position:relative;height:220px"><canvas id="bbozChart"></canvas></div>
   </div>
 </div>
 
-<!-- PAPER TRADES -->
+<!-- ══════════ PAPER TRADES ══════════ -->
 <div id="tab-trades" class="tab">
   <div class="page-header">
     <div><div class="page-title">Paper Trades</div><div class="page-sub">Starting capital: $100,000 AUD</div></div>
   </div>
-  <div class="metrics-row">
-    <div class="metric-box"><div class="metric-label">Portfolio</div><div class="metric-val" id="pt-portfolio">$100,000</div><div class="metric-sub">cash + open positions</div></div>
-    <div class="metric-box"><div class="metric-label">Open Value</div><div class="metric-val a" id="pt-openval">$0</div><div class="metric-sub">at avg buy price</div></div>
-    <div class="metric-box"><div class="metric-label">Realised P&amp;L</div><div class="metric-val" id="pt-return">0.0%</div><div class="metric-sub">closed trades only</div></div>
-    <div class="metric-box"><div class="metric-label">Win rate</div><div class="metric-val" id="pt-winrate">—</div></div>
-    <div class="metric-box"><div class="metric-label">Total trades</div><div class="metric-val" id="pt-count">0</div></div>
+
+  <div class="metrics-row m5">
+    <div class="metric-card">
+      <div class="metric-label">Portfolio</div>
+      <div class="metric-val" id="pt-portfolio">$100,000</div>
+      <div class="metric-sub">cash + realised P&amp;L</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Open Value</div>
+      <div class="metric-val neu" id="pt-openval">$0</div>
+      <div class="metric-sub">at avg buy price</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Realised P&amp;L</div>
+      <div class="metric-val" id="pt-return">+0.00%</div>
+      <div class="metric-sub">closed trades only</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Win Rate</div>
+      <div class="metric-val" id="pt-winrate">—</div>
+      <div class="metric-sub" id="pt-winsub">no closed trades</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Total Trades</div>
+      <div class="metric-val" id="pt-count">0</div>
+    </div>
   </div>
-  <div class="card" style="margin-bottom:20px">
-    <div class="card-title">Log paper trade</div>
+
+  <div class="section-title">Performance Summary</div>
+  <div class="perf-grid">
+    <div class="perf-card">
+      <div class="perf-label">This Week P&amp;L</div>
+      <div class="perf-val" id="pt-week">$0</div>
+    </div>
+    <div class="perf-card">
+      <div class="perf-label">Total Realised P&amp;L ($)</div>
+      <div class="perf-val" id="pt-pnl-dollar">$0</div>
+    </div>
+    <div class="perf-card">
+      <div class="perf-label">Wins / Losses</div>
+      <div class="perf-val" id="pt-wins-losses">— / —</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-header"><div class="card-title">Log Paper Trade</div></div>
     <div class="form-grid">
       <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="t-date"></div>
-      <div class="form-group"><label class="form-label">Ticker</label><select class="form-select" id="t-ticker"><option>GEAR</option><option>BBOZ</option><option>CASH</option></select></div>
-      <div class="form-group"><label class="form-label">Action</label><select class="form-select" id="t-action"><option>BUY</option><option>SELL</option><option>HOLD</option></select></div>
-      <div class="form-group"><label class="form-label">Price ($)</label><input class="form-input" type="number" id="t-price" placeholder="e.g. 42.50" step="0.01"></div>
-      <div class="form-group"><label class="form-label">Shares</label><input class="form-input" type="number" id="t-shares" placeholder="e.g. 500"></div>
+      <div class="form-group"><label class="form-label">Ticker</label>
+        <select class="form-select" id="t-ticker"><option>GEAR</option><option>BBOZ</option><option>CASH</option></select></div>
+      <div class="form-group"><label class="form-label">Action</label>
+        <select class="form-select" id="t-action"><option>BUY</option><option>SELL</option><option>HOLD</option></select></div>
+      <div class="form-group"><label class="form-label">Price ($)</label>
+        <input class="form-input" type="number" id="t-price" placeholder="e.g. 42.50" step="0.01"></div>
+      <div class="form-group"><label class="form-label">Shares</label>
+        <input class="form-input" type="number" id="t-shares" placeholder="e.g. 500"></div>
       <div class="form-group"><label class="form-label">Strategy</label>
         <select class="form-select" id="t-strat">
           <option>Momentum Long</option><option>MR Long 1 (SMA20 Pullback)</option>
           <option>MR Long 2 (Deep Pullback)</option><option>MR Long 3 (SMA250 Bounce)</option>
           <option>MR Short (Overextension)</option><option>Momentum Short 1 (Breakdown)</option>
           <option>Momentum Short 2 (Failed Bounce)</option><option>Cash / No signal</option>
-        </select>
-      </div>
+        </select></div>
     </div>
-    <button class="btn-action" onclick="logTrade()">Log Trade</button>
-    <button class="btn-outline" onclick="clearTrades()">Clear All</button>
+    <button class="btn-primary" onclick="logTrade()">Log Trade</button>
+    <button class="btn-ghost" onclick="clearTrades()">Clear All</button>
   </div>
+
   <div class="card">
-    <div class="card-title">Trade log</div>
+    <div class="card-header"><div class="card-title">Trade Log</div></div>
     <div style="overflow-x:auto">
       <table class="data-table">
-        <thead><tr><th>#</th><th>Date</th><th>Ticker</th><th>Action</th><th>Shares</th><th>Price</th><th>Value</th><th>Strategy</th></tr></thead>
-        <tbody id="trade-tbody"><tr><td colspan="8" style="color:var(--text3);padding:24px 12px;text-align:center;font-family:'DM Mono',monospace;font-size:12px;">No trades logged yet</td></tr></tbody>
+        <thead><tr><th>#</th><th>Date</th><th>Ticker</th><th>Action</th><th>Shares</th><th>Price</th><th>Value</th><th>Strategy</th><th></th></tr></thead>
+        <tbody id="trade-tbody">
+          <tr><td colspan="9" style="color:var(--text3);padding:28px;text-align:center;font-family:'DM Mono',monospace;font-size:12px">No trades logged yet</td></tr>
+        </tbody>
       </table>
     </div>
   </div>
 </div>
 
-<!-- BACKTEST -->
+<!-- ══════════ BACKTEST ══════════ -->
 <div id="tab-backtest" class="tab">
   <div class="page-header">
     <div><div class="page-title">Backtest 2022–2024</div><div class="page-sub">ASX 200 historical simulation — pre-calculated at build time</div></div>
   </div>
   <div class="info-box">Results use real ASX 200 daily closes. GEAR modelled as 2× daily return minus 0.35% MER/year. BBOZ modelled as −2× daily return minus 0.56% MER/year. Does not account for brokerage (~$9.50/trade on SelfWealth).</div>
-  <div class="bt-summary">
-    <div class="bt-metric"><div class="bt-metric-val {'g' if bt['total_return'] >= 0 else 'r'}">{bt["total_return"]:+.1f}%</div><div class="bt-metric-label">Total Return</div></div>
-    <div class="bt-metric"><div class="bt-metric-val {'g' if bt['cagr'] >= 0 else 'r'}">{bt["cagr"]:+.1f}%</div><div class="bt-metric-label">CAGR</div></div>
-    <div class="bt-metric"><div class="bt-metric-val r">{bt["max_dd"]:.1f}%</div><div class="bt-metric-label">Max Drawdown</div></div>
-    <div class="bt-metric"><div class="bt-metric-val {'g' if bt['win_rate'] >= 50 else 'a'}">{bt["win_rate"]:.0f}%</div><div class="bt-metric-label">Win Rate</div></div>
-    <div class="bt-metric"><div class="bt-metric-val {'g' if bt['sharpe'] >= 1 else 'a' if bt['sharpe'] >= 0 else 'r'}">{bt["sharpe"]:.2f}</div><div class="bt-metric-label">Sharpe Ratio</div></div>
+
+  <div class="metrics-row m5">
+    <div class="metric-card"><div class="metric-label">Total Return</div><div class="metric-val" style="color:{bt_rc}">{bt["total_return"]:+.1f}%</div></div>
+    <div class="metric-card"><div class="metric-label">CAGR</div><div class="metric-val" style="color:{bt_cc}">{bt["cagr"]:+.1f}%</div></div>
+    <div class="metric-card"><div class="metric-label">Max Drawdown</div><div class="metric-val neg">{bt["max_dd"]:.1f}%</div></div>
+    <div class="metric-card"><div class="metric-label">Win Rate</div><div class="metric-val {'pos' if bt['win_rate']>=50 else 'neu'}">{bt["win_rate"]:.0f}%</div></div>
+    <div class="metric-card"><div class="metric-label">Sharpe Ratio</div><div class="metric-val {'pos' if bt['sharpe']>=1 else 'neu' if bt['sharpe']>=0 else 'neg'}">{bt["sharpe"]:.2f}</div></div>
   </div>
-  <div class="chart-card">
-    <div class="chart-header">
-      <div class="chart-title">Equity curve — System vs Buy &amp; Hold ASX 200</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Equity Curve — System vs Buy &amp; Hold ASX 200</div>
       <div class="legend">
-        <div class="legend-item"><div class="legend-dot" style="background:#00d4a0"></div>JYTS System</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#4a9eff"></div>ASX 200 B&amp;H</div>
+        <div class="legend-item"><div class="legend-line" style="background:#15803d"></div>JYTS System</div>
+        <div class="legend-item"><div class="legend-line" style="background:#2563eb"></div>ASX 200 B&amp;H</div>
       </div>
     </div>
     <div style="position:relative;height:300px"><canvas id="btEquityChart"></canvas></div>
   </div>
-  <div class="chart-card">
-    <div class="chart-header"><div class="chart-title">Drawdown</div></div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Drawdown</div></div>
     <div style="position:relative;height:160px"><canvas id="btDDChart"></canvas></div>
   </div>
-  <div class="card">
-    <div class="card-title">Regime performance breakdown</div>
+
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-header"><div class="card-title">Performance by Regime</div></div>
     <table class="data-table">
       <thead><tr><th>Regime</th><th>Days</th><th>ETF</th><th>System Return</th><th>ASX Return</th><th>Result</th></tr></thead>
       <tbody>{bt_regime_rows}</tbody>
     </table>
   </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">Recent Regime Transitions</div></div>
+    <table class="data-table">
+      <thead><tr><th>Date</th><th>From</th><th></th><th>To</th><th>ASX Price</th></tr></thead>
+      <tbody>{trans_rows}</tbody>
+    </table>
+  </div>
   <div class="warn-box" style="margin-top:16px">Past performance does not guarantee future results.</div>
 </div>
 
-<!-- STRATEGIES -->
+<!-- ══════════ STRATEGIES ══════════ -->
 <div id="tab-strategies" class="tab">
   <div class="page-header"><div><div class="page-title">7 Strategies</div><div class="page-sub">ASX 200 adapted — GEAR (long) &amp; BBOZ (short)</div></div></div>
   <div class="strat-grid">
-    <div class="strat-card"><div class="strat-header"><div class="strat-name">Momentum Long</div><span class="badge badge-g">GEAR</span></div><div class="strat-body">ASX 200 breaks above upper Bollinger Band while above SMA20. Ride strong upward momentum.</div><div class="strat-rule">Entry: price &gt; upper BB + above SMA20<br>Exit: close below SMA20 · Regime: Uptrend</div></div>
-    <div class="strat-card"><div class="strat-header"><div class="strat-name">MR Long 1 — SMA20 Pullback</div><span class="badge badge-g">GEAR</span></div><div class="strat-body">ASX 200 pulls back to within 1% of SMA20. Buy the dip expecting a bounce.</div><div class="strat-rule">Entry: within 1% of SMA20<br>Exit: extends 3%+ above SMA20 · Regime: Uptrend</div></div>
-    <div class="strat-card"><div class="strat-header"><div class="strat-name">MR Long 2 — Deep Pullback</div><span class="badge badge-g">GEAR</span></div><div class="strat-body">ASX drops below lower BB but stays above SMA250. Aggressive dip buy.</div><div class="strat-rule">Entry: price &lt; lower BB AND &gt; SMA250<br>Exit: reclaims middle BB · Regime: Uptrend</div></div>
-    <div class="strat-card"><div class="strat-header"><div class="strat-name">MR Long 3 — SMA250 Bounce</div><span class="badge badge-g">GEAR</span></div><div class="strat-body">ASX approaches SMA250 from above with a bullish candle. Catch the long-term support bounce.</div><div class="strat-rule">Entry: within 3% of SMA250 + bullish candle<br>Exit: 5%+ above SMA20 · Regime: Near SMA250</div></div>
-    <div class="strat-card"><div class="strat-header"><div class="strat-name">MR Short — Overextension</div><span class="badge badge-r">BBOZ</span></div><div class="strat-body">ASX is 4%+ above SMA20 AND above upper BB. Fade extreme overextension.</div><div class="strat-rule">Entry: ext20 &gt; 4% AND price &gt; upper BB<br>Exit: reverts to SMA20 · Regime: Uptrend</div></div>
-    <div class="strat-card"><div class="strat-header"><div class="strat-name">Momentum Short 1 — Breakdown</div><span class="badge badge-r">BBOZ</span></div><div class="strat-body">ASX closes below SMA250 AND lower BB. Major bearish signal. Size scales with depth.</div><div class="strat-rule">Entry: price &lt; SMA250 + lower BB<br>Exit: reclaims SMA250 · Regime: Downtrend</div></div>
-    <div class="strat-card" style="grid-column:span 2"><div class="strat-header"><div class="strat-name">Momentum Short 2 — Failed Bounce</div><span class="badge badge-r">BBOZ</span></div><div class="strat-body">In a downtrend, ASX bounces to SMA20 then closes back below it. Classic bull trap — short the failure.</div><div class="strat-rule">Entry: bounce to SMA20 then close below it in downtrend · Exit: above SMA20 for 3 days</div></div>
+    <div class="strat-card"><div class="strat-header"><div class="strat-name">Momentum Long</div><span class="badge badge-up">GEAR</span></div><div class="strat-body">ASX 200 breaks above upper Bollinger Band while above SMA20. Ride strong upward momentum.</div><div class="strat-rule">Entry: price &gt; upper BB + above SMA20<br>Exit: close below SMA20 · Regime: Uptrend</div></div>
+    <div class="strat-card"><div class="strat-header"><div class="strat-name">MR Long 1 — SMA20 Pullback</div><span class="badge badge-up">GEAR</span></div><div class="strat-body">ASX 200 pulls back to within 1% of SMA20. Buy the dip expecting a bounce.</div><div class="strat-rule">Entry: within 1% of SMA20<br>Exit: extends 3%+ above SMA20 · Regime: Uptrend</div></div>
+    <div class="strat-card"><div class="strat-header"><div class="strat-name">MR Long 2 — Deep Pullback</div><span class="badge badge-up">GEAR</span></div><div class="strat-body">ASX drops below lower BB but stays above SMA250. Aggressive dip buy.</div><div class="strat-rule">Entry: price &lt; lower BB AND &gt; SMA250<br>Exit: reclaims middle BB · Regime: Uptrend</div></div>
+    <div class="strat-card"><div class="strat-header"><div class="strat-name">MR Long 3 — SMA250 Bounce</div><span class="badge badge-up">GEAR</span></div><div class="strat-body">ASX approaches SMA250 from above with a bullish candle. Catch the long-term support bounce.</div><div class="strat-rule">Entry: within 3% of SMA250 + bullish candle<br>Exit: 5%+ above SMA20 · Regime: Near SMA250</div></div>
+    <div class="strat-card"><div class="strat-header"><div class="strat-name">MR Short — Overextension</div><span class="badge badge-dn">BBOZ</span></div><div class="strat-body">ASX is 4%+ above SMA20 AND above upper BB. Fade extreme overextension.</div><div class="strat-rule">Entry: ext20 &gt; 4% AND price &gt; upper BB<br>Exit: reverts to SMA20 · Regime: Uptrend</div></div>
+    <div class="strat-card"><div class="strat-header"><div class="strat-name">Momentum Short 1 — Breakdown</div><span class="badge badge-dn">BBOZ</span></div><div class="strat-body">ASX closes below SMA250 AND lower BB. Major bearish signal. Size scales with depth.</div><div class="strat-rule">Entry: price &lt; SMA250 + lower BB<br>Exit: reclaims SMA250 · Regime: Downtrend</div></div>
+    <div class="strat-card" style="grid-column:span 2"><div class="strat-header"><div class="strat-name">Momentum Short 2 — Failed Bounce</div><span class="badge badge-dn">BBOZ</span></div><div class="strat-body">In a downtrend, ASX bounces to SMA20 then closes back below it. Classic bull trap — short the failure.</div><div class="strat-rule">Entry: bounce to SMA20 then close below it in downtrend · Exit: above SMA20 for 3 days</div></div>
   </div>
   <div class="card">
-    <div class="card-title">Regime playbook — $100K capital</div>
+    <div class="card-header"><div class="card-title">Regime Playbook — $100K Capital</div></div>
     <table class="data-table">
       <thead><tr><th>Regime</th><th>Condition</th><th>ETF</th><th>Allocation</th><th>$ Amount</th></tr></thead>
       <tbody>
-        <tr><td>Strong uptrend</td><td>ASX &gt;2% above SMA250, RSI &gt;55</td><td><span class="badge badge-g">GEAR</span></td><td>80%</td><td class="pnl-g">$80,000</td></tr>
-        <tr><td>Uptrend</td><td>ASX above SMA250</td><td><span class="badge badge-g">GEAR</span></td><td>50%</td><td class="pnl-g">$50,000</td></tr>
-        <tr><td>Neutral</td><td>Within 1% of SMA250</td><td><span class="badge badge-n">CASH</span></td><td>100%</td><td style="color:var(--text3)">$100,000</td></tr>
-        <tr><td>Downtrend</td><td>ASX below SMA250</td><td><span class="badge badge-r">BBOZ</span></td><td>30%</td><td class="pnl-r">$30,000</td></tr>
-        <tr><td>Strong downtrend</td><td>ASX &gt;2% below SMA250, RSI &lt;40</td><td><span class="badge badge-r">BBOZ</span></td><td>60%</td><td class="pnl-r">$60,000</td></tr>
+        <tr><td>Strong uptrend</td><td>ASX &gt;2% above SMA250, RSI &gt;55</td><td><span class="badge badge-up">GEAR</span></td><td>80%</td><td class="pos">$80,000</td></tr>
+        <tr><td>Uptrend</td><td>ASX above SMA250</td><td><span class="badge badge-up">GEAR</span></td><td>50%</td><td class="pos">$50,000</td></tr>
+        <tr><td>Neutral</td><td>Within 1% of SMA250</td><td><span class="badge badge-nu">CASH</span></td><td>100%</td><td style="color:var(--text3)">$100,000</td></tr>
+        <tr><td>Downtrend</td><td>ASX below SMA250</td><td><span class="badge badge-dn">BBOZ</span></td><td>30%</td><td class="neg">$30,000</td></tr>
+        <tr><td>Strong downtrend</td><td>ASX &gt;2% below SMA250, RSI &lt;40</td><td><span class="badge badge-dn">BBOZ</span></td><td>60%</td><td class="neg">$60,000</td></tr>
       </tbody>
     </table>
   </div>
 </div>
 
-<!-- HOW TO USE -->
+<!-- ══════════ HOW TO USE ══════════ -->
 <div id="tab-guide" class="tab">
   <div class="page-header"><div><div class="page-title">How to Use</div><div class="page-sub">Daily routine and trading rules</div></div></div>
   <div class="card" style="margin-bottom:20px">
-    <div class="card-title">Daily routine — 10 minutes</div>
+    <div class="card-header"><div class="card-title">Daily Routine — 10 Minutes</div></div>
     <table class="data-table">
       <thead><tr><th>Time (AEST/AEDT)</th><th>Action</th><th>Where</th></tr></thead>
       <tbody>
         <tr><td style="color:var(--green);font-family:'DM Mono',monospace">4:00 pm</td><td>ASX closes</td><td style="color:var(--text3)">—</td></tr>
-        <tr><td style="color:var(--green);font-family:'DM Mono',monospace">4:15 pm</td><td>Open your GitHub Pages URL — dashboard auto-updated</td><td style="color:var(--text3)">Browser</td></tr>
-        <tr><td style="color:var(--green);font-family:'DM Mono',monospace">4:16 pm</td><td>Enter password → read Signal Card</td><td style="color:var(--text3)">Dashboard tab</td></tr>
+        <tr><td style="color:var(--green);font-family:'DM Mono',monospace">4:15 pm</td><td>Open dashboard — auto-updated</td><td style="color:var(--text3)">This page</td></tr>
+        <tr><td style="color:var(--green);font-family:'DM Mono',monospace">4:16 pm</td><td>Read Signal Card — note action &amp; regime</td><td style="color:var(--text3)">Dashboard tab</td></tr>
         <tr><td style="color:var(--green);font-family:'DM Mono',monospace">4:18 pm</td><td>Check GEAR or BBOZ closing price</td><td style="color:var(--text3)">SelfWealth</td></tr>
         <tr><td style="color:var(--green);font-family:'DM Mono',monospace">4:20 pm</td><td>Log your paper trade</td><td style="color:var(--text3)">Paper Trades tab</td></tr>
         <tr><td style="color:var(--green);font-family:'DM Mono',monospace">4:25 pm</td><td>Done. See you tomorrow.</td><td style="color:var(--text3)">—</td></tr>
@@ -647,7 +817,7 @@ body{{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fo
     </table>
   </div>
   <div class="card" style="margin-bottom:20px">
-    <div class="card-title">Stop loss rules</div>
+    <div class="card-header"><div class="card-title">Stop Loss Rules</div></div>
     <table class="data-table">
       <thead><tr><th>Rule</th><th>Trigger</th><th>Action</th></tr></thead>
       <tbody>
@@ -665,7 +835,7 @@ body{{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fo
 </div>
 
 <script>
-// ─── Password ─────────────────────────────────────────────────────
+// ─── Password ──────────────────────────────────────────────────────
 function unlock() {{
   const pw = document.getElementById('lock-pw').value;
   if (pw === 'Youarewhoyouthinkyouare') {{
@@ -682,7 +852,7 @@ if (sessionStorage.getItem('jyts_auth') === '1') {{
   document.getElementById('app-content').style.display = 'grid';
 }}
 
-// ─── Nav ──────────────────────────────────────────────────────────
+// ─── Nav ───────────────────────────────────────────────────────────
 function showTab(name, el) {{
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -690,61 +860,92 @@ function showTab(name, el) {{
   if (el) el.classList.add('active');
 }}
 
-// ─── Charts (pre-baked data) ──────────────────────────────────────
+// ─── Chart data ────────────────────────────────────────────────────
 const CD = {json.dumps(cd)};
 const BT = {json.dumps(bt)};
-const chartOpts = {{
+
+const baseOpts = {{
   responsive: true, maintainAspectRatio: false,
   plugins: {{ legend: {{ display: false }} }},
   scales: {{
-    x: {{ ticks: {{ maxTicksLimit: 8, font: {{ size: 10 }}, color: '#4a5568' }}, grid: {{ color: 'rgba(255,255,255,0.04)' }}, border: {{ display: false }} }},
-    y: {{ ticks: {{ font: {{ size: 10 }}, color: '#4a5568', callback: v => v.toLocaleString() }}, grid: {{ color: 'rgba(255,255,255,0.04)' }}, border: {{ display: false }} }}
+    x: {{ ticks: {{ maxTicksLimit: 8, font: {{ size: 10 }}, color: '#94a3b8' }}, grid: {{ color: 'rgba(15,23,42,0.05)' }}, border: {{ display: false }} }},
+    y: {{ ticks: {{ font: {{ size: 10 }}, color: '#94a3b8', callback: v => v.toLocaleString() }}, grid: {{ color: 'rgba(15,23,42,0.05)' }}, border: {{ display: false }} }}
   }}
 }};
 
+// ASX Price chart
 new Chart(document.getElementById('priceChart'), {{
   type: 'line',
   data: {{ labels: CD.labels, datasets: [
-    {{ data: CD.closes, borderColor: '#00d4a0', borderWidth: 2, pointRadius: 0, tension: 0.3, fill: false }},
-    {{ data: CD.sma20, borderColor: '#f0a832', borderWidth: 1, pointRadius: 0, borderDash: [4,3], tension: 0.3, fill: false }},
-    {{ data: CD.sma250, borderColor: '#ff5e5e', borderWidth: 1.5, pointRadius: 0, tension: 0.3, fill: false }}
-  ]}},
-  options: chartOpts
+    {{ data: CD.closes, borderColor: '#0f172a', borderWidth: 2, pointRadius: 0, tension: 0.3, fill: false }},
+    {{ data: CD.sma20, borderColor: '#f59e0b', borderWidth: 1.5, pointRadius: 0, borderDash: [5,3], tension: 0.3, fill: false }},
+    {{ data: CD.sma250, borderColor: '#ef4444', borderWidth: 1.5, pointRadius: 0, tension: 0.3, fill: false }}
+  ]}}, options: baseOpts
 }});
 
+// RSI
 new Chart(document.getElementById('rsiChart'), {{
   type: 'line',
-  data: {{ labels: CD.labels, datasets: [{{ data: CD.rsi, borderColor: '#4a9eff', borderWidth: 1.5, pointRadius: 0, tension: 0.3, fill: false }}] }},
-  options: {{ ...chartOpts, scales: {{ ...chartOpts.scales, y: {{ min: 0, max: 100, ticks: {{ font: {{ size: 10 }}, color: '#4a5568', stepSize: 25 }}, grid: {{ color: 'rgba(255,255,255,0.04)' }}, border: {{ display: false }} }} }} }}
+  data: {{ labels: CD.labels, datasets: [{{ data: CD.rsi, borderColor: '#2563eb', borderWidth: 1.5, pointRadius: 0, tension: 0.3, fill: false }}] }},
+  options: {{ ...baseOpts, scales: {{ ...baseOpts.scales,
+    y: {{ min: 0, max: 100, ticks: {{ font: {{ size: 10 }}, color: '#94a3b8', stepSize: 25 }}, grid: {{ color: 'rgba(15,23,42,0.05)' }}, border: {{ display: false }} }} }} }}
 }});
 
-new Chart(document.getElementById('bbChart'), {{
-  type: 'line',
-  data: {{ labels: CD.labels, datasets: [
-    {{ data: CD.closes, borderColor: '#00d4a0', borderWidth: 1.5, pointRadius: 0, tension: 0.3, fill: false }},
-    {{ data: CD.bb_upper, borderColor: 'rgba(240,168,50,0.5)', borderWidth: 1, pointRadius: 0, borderDash: [3,3], tension: 0.3, fill: false }},
-    {{ data: CD.bb_lower, borderColor: 'rgba(240,168,50,0.5)', borderWidth: 1, pointRadius: 0, borderDash: [3,3], tension: 0.3, fill: false }},
-    {{ data: CD.bb_mid, borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1, pointRadius: 0, tension: 0.3, fill: false }}
-  ]}},
-  options: chartOpts
-}});
+// GEAR benchmark
+const gearData = CD.gear_norm && CD.gear_norm.some(v => v !== null);
+if (gearData) {{
+  new Chart(document.getElementById('gearChart'), {{
+    type: 'line',
+    data: {{ labels: CD.labels, datasets: [
+      {{ label: 'ASX 200', data: CD.asx_norm, borderColor: '#2563eb', borderWidth: 1.5, pointRadius: 0, tension: 0.3, fill: false, borderDash: [5,3] }},
+      {{ label: 'GEAR.AX', data: CD.gear_norm, borderColor: '#15803d', borderWidth: 2, pointRadius: 0, tension: 0.3, fill: false }}
+    ]}},
+    options: {{ ...baseOpts,
+      plugins: {{ legend: {{ display: true, labels: {{ color: '#475569', font: {{ size: 11 }}, boxWidth: 14, padding: 16 }} }} }},
+      scales: {{ ...baseOpts.scales, y: {{ ticks: {{ font: {{ size: 10 }}, color: '#94a3b8', callback: v => v.toFixed(0) }}, grid: {{ color: 'rgba(15,23,42,0.05)' }}, border: {{ display: false }} }} }} }}
+  }});
+}} else {{
+  document.getElementById('gearChart').parentElement.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:40px;font-size:12px;font-family:DM Mono,monospace">GEAR.AX data unavailable</p>';
+}}
 
+// BBOZ benchmark
+const bbozData = CD.bboz_norm && CD.bboz_norm.some(v => v !== null);
+if (bbozData) {{
+  new Chart(document.getElementById('bbozChart'), {{
+    type: 'line',
+    data: {{ labels: CD.labels, datasets: [
+      {{ label: 'ASX 200', data: CD.asx_norm, borderColor: '#2563eb', borderWidth: 1.5, pointRadius: 0, tension: 0.3, fill: false, borderDash: [5,3] }},
+      {{ label: 'BBOZ.AX', data: CD.bboz_norm, borderColor: '#b91c1c', borderWidth: 2, pointRadius: 0, tension: 0.3, fill: false }}
+    ]}},
+    options: {{ ...baseOpts,
+      plugins: {{ legend: {{ display: true, labels: {{ color: '#475569', font: {{ size: 11 }}, boxWidth: 14, padding: 16 }} }} }},
+      scales: {{ ...baseOpts.scales, y: {{ ticks: {{ font: {{ size: 10 }}, color: '#94a3b8', callback: v => v.toFixed(0) }}, grid: {{ color: 'rgba(15,23,42,0.05)' }}, border: {{ display: false }} }} }} }}
+  }});
+}} else {{
+  document.getElementById('bbozChart').parentElement.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:40px;font-size:12px;font-family:DM Mono,monospace">BBOZ.AX data unavailable</p>';
+}}
+
+// Backtest equity
 new Chart(document.getElementById('btEquityChart'), {{
   type: 'line',
   data: {{ labels: BT.labels, datasets: [
-    {{ label: 'JYTS System', data: BT.equity, borderColor: '#00d4a0', borderWidth: 2, pointRadius: 0, tension: 0.3, fill: false }},
-    {{ label: 'ASX 200 B&H', data: BT.bh_equity, borderColor: '#4a9eff', borderWidth: 1.5, pointRadius: 0, borderDash: [4,3], tension: 0.3, fill: false }}
+    {{ label: 'JYTS System', data: BT.equity, borderColor: '#15803d', borderWidth: 2, pointRadius: 0, tension: 0.3, fill: false }},
+    {{ label: 'ASX 200 B&H', data: BT.bh_equity, borderColor: '#2563eb', borderWidth: 1.5, pointRadius: 0, borderDash: [5,3], tension: 0.3, fill: false }}
   ]}},
-  options: {{ ...chartOpts, plugins: {{ legend: {{ display: true, labels: {{ color: '#8a95a8', font: {{ size: 11 }}, boxWidth: 10 }} }} }}, scales: {{ ...chartOpts.scales, y: {{ ticks: {{ font: {{ size: 10 }}, color: '#4a5568', callback: v => '$' + (v/1000).toFixed(0) + 'K' }}, grid: {{ color: 'rgba(255,255,255,0.04)' }}, border: {{ display: false }} }} }} }}
+  options: {{ ...baseOpts,
+    plugins: {{ legend: {{ display: true, labels: {{ color: '#475569', font: {{ size: 11 }}, boxWidth: 14, padding: 16 }} }} }},
+    scales: {{ ...baseOpts.scales, y: {{ ticks: {{ font: {{ size: 10 }}, color: '#94a3b8', callback: v => '$' + (v/1000).toFixed(0) + 'K' }}, grid: {{ color: 'rgba(15,23,42,0.05)' }}, border: {{ display: false }} }} }} }}
 }});
 
+// Drawdown
 new Chart(document.getElementById('btDDChart'), {{
   type: 'line',
-  data: {{ labels: BT.labels, datasets: [{{ data: BT.drawdowns, borderColor: '#ff5e5e', borderWidth: 1.5, pointRadius: 0, tension: 0.3, fill: {{ target: 'origin', above: 'rgba(255,94,94,0.08)' }} }}] }},
-  options: {{ ...chartOpts, scales: {{ ...chartOpts.scales, y: {{ ticks: {{ font: {{ size: 10 }}, color: '#4a5568', callback: v => v.toFixed(0) + '%' }}, grid: {{ color: 'rgba(255,255,255,0.04)' }}, border: {{ display: false }} }} }} }}
+  data: {{ labels: BT.labels, datasets: [{{ data: BT.drawdowns, borderColor: '#ef4444', borderWidth: 1.5, pointRadius: 0, tension: 0.3,
+    fill: {{ target: 'origin', above: 'rgba(239,68,68,0.08)' }} }}] }},
+  options: {{ ...baseOpts, scales: {{ ...baseOpts.scales, y: {{ ticks: {{ font: {{ size: 10 }}, color: '#94a3b8', callback: v => v.toFixed(0)+'%' }}, grid: {{ color: 'rgba(15,23,42,0.05)' }}, border: {{ display: false }} }} }} }}
 }});
 
-// ─── Paper trades ─────────────────────────────────────────────────
+// ─── Paper Trades ──────────────────────────────────────────────────
 let trades = JSON.parse(localStorage.getItem('jyts_trades') || '[]');
 document.getElementById('t-date').value = new Date().toISOString().split('T')[0];
 renderTrades();
@@ -757,105 +958,122 @@ function logTrade() {{
   const shares = parseInt(document.getElementById('t-shares').value);
   const strat = document.getElementById('t-strat').value;
   if (!date || !price || !shares) {{ alert('Please fill in date, price and shares.'); return; }}
-  trades.push({{ date, ticker, action, price, shares, value: parseFloat((price*shares).toFixed(2)), strat }});
+  trades.push({{ id: Date.now(), date, ticker, action, price, shares, value: parseFloat((price*shares).toFixed(2)), strat }});
   localStorage.setItem('jyts_trades', JSON.stringify(trades));
   renderTrades();
   document.getElementById('t-price').value = '';
   document.getElementById('t-shares').value = '';
 }}
 
+function deleteTrade(id) {{
+  if (!confirm('Delete this trade?')) return;
+  trades = trades.filter(t => t.id !== id);
+  localStorage.setItem('jyts_trades', JSON.stringify(trades));
+  renderTrades();
+}}
+
 function clearTrades() {{
-  if (!confirm('Clear all paper trades?')) return;
+  if (!confirm('Clear ALL trades? This cannot be undone.')) return;
   trades = [];
   localStorage.setItem('jyts_trades', JSON.stringify(trades));
   renderTrades();
 }}
 
-function renderTrades() {{
-  let openPositions = {{}};
-  let realisedPnL = 0;
-  let wins = 0, losses = 0;
-
+function getWeekPnL() {{
+  const now = new Date();
+  const sow = new Date(now); sow.setDate(now.getDate()-now.getDay()); sow.setHours(0,0,0,0);
+  let openPos = {{}}, weekPnL = 0;
   trades.forEach(t => {{
-    if (t.action === 'BUY') {{
-      if (!openPositions[t.ticker]) openPositions[t.ticker] = {{ shares: 0, cost: 0 }};
-      openPositions[t.ticker].shares += t.shares;
-      openPositions[t.ticker].cost += t.value;
+    if (t.action==='BUY') {{
+      if (!openPos[t.ticker]) openPos[t.ticker]={{shares:0,cost:0}};
+      openPos[t.ticker].shares+=t.shares; openPos[t.ticker].cost+=t.value;
     }}
-    if (t.action === 'SELL') {{
-      const pos = openPositions[t.ticker];
-      if (pos && pos.shares > 0) {{
-        const avgCost = pos.cost / pos.shares;
-        const pnl = (t.price - avgCost) * t.shares;
-        realisedPnL += pnl;
-        if (pnl >= 0) wins++; else losses++;
-        pos.shares -= t.shares;
-        pos.cost = pos.shares * avgCost;
-        if (pos.shares <= 0) delete openPositions[t.ticker];
+    if (t.action==='SELL') {{
+      const pos=openPos[t.ticker];
+      if (pos&&pos.shares>0) {{
+        const avg=pos.cost/pos.shares, pnl=(t.price-avg)*t.shares;
+        if (new Date(t.date)>=sow) weekPnL+=pnl;
+        pos.shares-=t.shares; pos.cost=pos.shares*avg;
+        if (pos.shares<=0) delete openPos[t.ticker];
+      }}
+    }}
+  }});
+  return weekPnL;
+}}
+
+function renderTrades() {{
+  let openPos={{}}, realPnL=0, wins=0, losses=0;
+  trades.forEach(t => {{
+    if (t.action==='BUY') {{
+      if (!openPos[t.ticker]) openPos[t.ticker]={{shares:0,cost:0}};
+      openPos[t.ticker].shares+=t.shares; openPos[t.ticker].cost+=t.value;
+    }}
+    if (t.action==='SELL') {{
+      const pos=openPos[t.ticker];
+      if (pos&&pos.shares>0) {{
+        const avg=pos.cost/pos.shares, pnl=(t.price-avg)*t.shares;
+        realPnL+=pnl; if(pnl>=0) wins++; else losses++;
+        pos.shares-=t.shares; pos.cost=pos.shares*avg;
+        if(pos.shares<=0) delete openPos[t.ticker];
       }}
     }}
   }});
 
-  // Open position value — use last known buy price as proxy
-  let openValue = 0;
-  const tickersSeen = {{}};
-  trades.slice().reverse().forEach(t => {{
-    if (openPositions[t.ticker] && !tickersSeen[t.ticker] && t.action === 'BUY') {{
-      openValue += openPositions[t.ticker].shares * t.price;
-      tickersSeen[t.ticker] = true;
+  let openValue=0; const seen={{}};
+  trades.slice().reverse().forEach(t=>{{
+    if(openPos[t.ticker]&&!seen[t.ticker]&&t.action==='BUY'){{
+      openValue+=openPos[t.ticker].shares*t.price; seen[t.ticker]=true;
     }}
   }});
 
-  const portfolioVal = 100000 + realisedPnL;
-  const ret = realisedPnL / 100000 * 100;
+  const ret=realPnL/100000*100, wkPnL=getWeekPnL(), total=wins+losses;
 
-  document.getElementById('pt-portfolio').textContent = '$' + portfolioVal.toLocaleString('en-AU', {{ maximumFractionDigits: 0 }});
-  document.getElementById('pt-openval').textContent = '$' + openValue.toLocaleString('en-AU', {{ maximumFractionDigits: 0 }});
-  const retEl = document.getElementById('pt-return');
-  retEl.textContent = (ret >= 0 ? '+' : '') + ret.toFixed(2) + '%';
-  retEl.className = 'metric-val ' + (ret >= 0 ? 'g' : 'r');
-  document.getElementById('pt-count').textContent = trades.length;
-  document.getElementById('pt-winrate').textContent = (wins + losses) > 0 ? Math.round(wins / (wins + losses) * 100) + '%' : '—';
+  document.getElementById('pt-portfolio').textContent='$'+(100000+realPnL).toLocaleString('en-AU',{{maximumFractionDigits:0}});
+  document.getElementById('pt-openval').textContent='$'+openValue.toLocaleString('en-AU',{{maximumFractionDigits:0}});
 
-  const tbody = document.getElementById('trade-tbody');
+  const retEl=document.getElementById('pt-return');
+  retEl.textContent=(ret>=0?'+':'')+ret.toFixed(2)+'%';
+  retEl.className='metric-val '+(ret>=0?'pos':'neg');
+
+  document.getElementById('pt-count').textContent=trades.length;
+  document.getElementById('pt-winrate').textContent=total>0?Math.round(wins/total*100)+'%':'—';
+  document.getElementById('pt-winsub').textContent=total>0?`${{wins}} wins / ${{losses}} losses`:'no closed trades';
+
+  const wkEl=document.getElementById('pt-week');
+  wkEl.textContent=(wkPnL>=0?'+$':'-$')+Math.abs(wkPnL).toLocaleString('en-AU',{{maximumFractionDigits:0}});
+  wkEl.className='perf-val '+(wkPnL>=0?'pos':'neg');
+
+  const pnlEl=document.getElementById('pt-pnl-dollar');
+  pnlEl.textContent=(realPnL>=0?'+$':'-$')+Math.abs(realPnL).toLocaleString('en-AU',{{maximumFractionDigits:0}});
+  pnlEl.className='perf-val '+(realPnL>=0?'pos':'neg');
+
+  document.getElementById('pt-wins-losses').textContent=`${{wins}} / ${{losses}}`;
+
+  const tbody=document.getElementById('trade-tbody');
   if (!trades.length) {{
-    tbody.innerHTML = '<tr><td colspan="8" style="color:var(--text3);padding:24px 12px;text-align:center;font-family:\\'DM Mono\\',monospace;font-size:12px;">No trades logged yet</td></tr>';
+    tbody.innerHTML='<tr><td colspan="9" style="color:var(--text3);padding:28px;text-align:center;font-family:DM Mono,monospace;font-size:12px">No trades logged yet</td></tr>';
     return;
   }}
-  tbody.innerHTML = trades.slice().reverse().map((t, i) =>
-    `<tr>
-      <td style="color:var(--text3);font-family:'DM Mono',monospace">${{trades.length - i}}</td>
+  tbody.innerHTML=trades.slice().reverse().map((t,i)=>{{
+    const ac=t.action==='BUY'?'buy-tag':t.action==='SELL'?'sell-tag':'hold-tag';
+    const bc=t.ticker==='GEAR'?'badge-up':t.ticker==='BBOZ'?'badge-dn':'badge-nu';
+    const tid=t.id||i;
+    return `<tr>
+      <td style="color:var(--text3);font-family:'DM Mono',monospace;font-size:12px">${{trades.length-i}}</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px">${{t.date}}</td>
-      <td><span class="badge ${{t.ticker==='GEAR'?'badge-g':t.ticker==='BBOZ'?'badge-r':'badge-n'}}">${{t.ticker}}</span></td>
-      <td class="${{t.action==='BUY'?'buy-tag':'sell-tag'}}">${{t.action}}</td>
+      <td><span class="badge ${{bc}}">${{t.ticker}}</span></td>
+      <td class="${{ac}}">${{t.action}}</td>
       <td style="font-family:'DM Mono',monospace">${{t.shares.toLocaleString()}}</td>
       <td style="font-family:'DM Mono',monospace">$${{t.price.toFixed(2)}}</td>
       <td style="font-family:'DM Mono',monospace">$${{t.value.toLocaleString('en-AU',{{maximumFractionDigits:0}})}}</td>
       <td style="font-size:11px;color:var(--text3)">${{t.strat}}</td>
-    </tr>`
-  ).join('');
+      <td><button class="btn-del" onclick="deleteTrade(${{tid}})" title="Delete">🗑</button></td>
+    </tr>`;
+  }}).join('');
 }}
 </script>
 </body>
 </html>"""
-
-def hash_password(password):
-    import ctypes
-    h = ctypes.c_int32(0)
-    for c in password:
-        h = ctypes.c_int32(31 * h.value + ord(c))
-    val = h.value
-    chars = '0123456789abcdefghijklmnopqrstuvwxyz'
-    negative = val < 0
-    n = abs(val)
-    if n == 0: return '0'
-    result = ''
-    while n:
-        result = chars[n % 36] + result
-        n //= 36
-    return ('-' if negative else '') + result
-
-generate_html.__doc__ = "patched"
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
 def main():
@@ -865,6 +1083,7 @@ def main():
     print(f"Build time: {build_time} {tz_name}")
 
     df = fetch_asx_data()
+    gear_df, bboz_df = fetch_etf_data()
 
     closes = df["Close"]
     sma20 = calc_sma(closes, 20)
@@ -897,16 +1116,13 @@ def main():
 
     print(f"  Regime: {regime} | Signal: {signal['action']}")
 
-    chart_data = build_chart_data(df)
+    chart_data = build_chart_data(df, gear_df, bboz_df)
     print("  Chart data built.")
 
     backtest_data = run_backtest(df)
     print(f"  Backtest: Return={backtest_data['total_return']:+.1f}% | MaxDD={backtest_data['max_dd']:.1f}% | WinRate={backtest_data['win_rate']:.0f}%")
 
-    pw_hash = hash_password("Youarewhoyouthinkyouare")
-
     html = generate_html(signal_data, chart_data, backtest_data, build_time, tz_name)
-    html = html.replace("'{hash_password(\"Youarewhoyouthinkyouare\")}'", f"'{pw_hash}'")
 
     os.makedirs("docs", exist_ok=True)
     out_path = "docs/index.html"
@@ -917,4 +1133,3 @@ def main():
 
 if __name__ == "__main__":
     main()
- 
