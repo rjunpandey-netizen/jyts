@@ -671,11 +671,9 @@ body{{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fo
 
 <script>
 // ─── Password ─────────────────────────────────────────────────────
-const PW_HASH = '{hash_password("Youarewhoyouthinkyouare")}';
 function unlock() {{
   const pw = document.getElementById('lock-pw').value;
-  const hash = simpleHash(pw);
-  if (hash === PW_HASH) {{
+  if (pw === 'Youarewhoyouthinkyouare') {{
     document.getElementById('lock-screen').classList.add('hidden');
     document.getElementById('app-content').style.display = 'grid';
     sessionStorage.setItem('jyts_auth', '1');
@@ -683,11 +681,6 @@ function unlock() {{
     document.getElementById('lock-error').style.display = 'block';
     document.getElementById('lock-pw').value = '';
   }}
-}}
-function simpleHash(s) {{
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
-  return h.toString(36);
 }}
 if (sessionStorage.getItem('jyts_auth') === '1') {{
   document.getElementById('lock-screen').classList.add('hidden');
