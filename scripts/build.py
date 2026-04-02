@@ -819,13 +819,21 @@ function renderTrades() {{
 </html>"""
 
 def hash_password(password):
-    """Simple hash matching the JS simpleHash function."""
-    h = 0
+    """Matches JS: let h=0; for(c) h=(31*h+charCode)|0; return h.toString(36)"""
+    import ctypes
+    h = ctypes.c_int32(0)
     for c in password:
-        h = (31 * h + ord(c)) & 0xFFFFFFFF
-        if h >= 0x80000000:
-            h -= 0x100000000
-    return format(h & 0xFFFFFFFF, 'x') if h >= 0 else format(h + 0x100000000, 'x')
+        h = ctypes.c_int32(31 * h.value + ord(c))
+    val = h.value
+    chars = '0123456789abcdefghijklmnopqrstuvwxyz'
+    negative = val < 0
+    n = abs(val)
+    if n == 0: return '0'
+    result = ''
+    while n:
+        result = chars[n % 36] + result
+        n //= 36
+    return ('-' if negative else '') + result
 
 # Patch the hash into the template
 generate_html.__doc__ = "patched"
