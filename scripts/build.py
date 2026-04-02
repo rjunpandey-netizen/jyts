@@ -16,21 +16,17 @@ import numpy as np
 def get_aest_now():
     """Return current Melbourne time with DST awareness."""
     utc_now = datetime.now(timezone.utc)
-    # AEDT: first Sun Oct → first Sun Apr (UTC+11)
-    # AEST: first Sun Apr → first Sun Oct (UTC+10)
     year = utc_now.year
-    # Find first Sunday in April
     apr1 = datetime(year, 4, 1)
     apr_sun = apr1 + timedelta(days=(6 - apr1.weekday()) % 7)
-    # Find first Sunday in October
     oct1 = datetime(year, 10, 1)
     oct_sun = oct1 + timedelta(days=(6 - oct1.weekday()) % 7)
     utc_naive = utc_now.replace(tzinfo=None)
     if apr_sun <= utc_naive < oct_sun:
-        offset = timedelta(hours=10)  # AEST
+        offset = timedelta(hours=10)
         tz_name = "AEST"
     else:
-        offset = timedelta(hours=11)  # AEDT
+        offset = timedelta(hours=11)
         tz_name = "AEDT"
     local = utc_now + offset
     return local, tz_name
@@ -290,7 +286,6 @@ def generate_html(signal_data, chart_data, backtest_data, build_time, tz_name):
 }}
 *{{box-sizing:border-box;margin:0;padding:0}}
 body{{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh}}
-/* Lock screen */
 #lock-screen{{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px}}
 #lock-screen.hidden{{display:none}}
 .lock-logo{{font-family:'Playfair Display',serif;font-size:28px;text-align:center;line-height:1.3}}
@@ -302,7 +297,6 @@ body{{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fo
 .lock-btn{{background:var(--green);color:#000;border:none;padding:12px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;cursor:pointer;transition:background .15s}}
 .lock-btn:hover{{background:var(--green2)}}
 .lock-error{{font-size:12px;color:var(--red);text-align:center;display:none;font-family:'DM Mono',monospace}}
-/* App */
 .app{{display:grid;grid-template-columns:220px 1fr;min-height:100vh}}
 .sidebar{{background:var(--bg2);border-right:1px solid var(--border);padding:0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}}
 .main{{padding:28px 32px;overflow-y:auto}}
@@ -340,7 +334,7 @@ body{{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fo
 .alloc-pct.g{{color:var(--green)}}.alloc-pct.r{{color:var(--red)}}.alloc-pct.w{{color:var(--text2)}}
 .alloc-bar{{height:3px;background:var(--bg);border-radius:2px;margin-top:8px}}
 .alloc-fill{{height:100%;border-radius:2px}}
-.metrics-row{{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}}
+.metrics-row{{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}}
 .metric-box{{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px}}
 .metric-label{{font-size:10px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:8px}}
 .metric-val{{font-size:22px;font-weight:300;color:var(--text);font-family:'DM Mono',monospace;letter-spacing:-0.5px}}
@@ -481,7 +475,7 @@ body{{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fo
     </div>
   </div>
 
-  <div class="metrics-row">
+  <div class="metrics-row" style="grid-template-columns:repeat(4,1fr)">
     <div class="metric-box">
       <div class="metric-label">ASX 200</div>
       <div class="metric-val">{sd["price"]:,.0f}</div>
@@ -534,8 +528,9 @@ body{{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fo
     <div><div class="page-title">Paper Trades</div><div class="page-sub">Starting capital: $100,000 AUD</div></div>
   </div>
   <div class="metrics-row">
-    <div class="metric-box"><div class="metric-label">Portfolio</div><div class="metric-val" id="pt-portfolio">$100,000</div></div>
-    <div class="metric-box"><div class="metric-label">Return</div><div class="metric-val" id="pt-return">0.0%</div></div>
+    <div class="metric-box"><div class="metric-label">Portfolio</div><div class="metric-val" id="pt-portfolio">$100,000</div><div class="metric-sub">cash + open positions</div></div>
+    <div class="metric-box"><div class="metric-label">Open Value</div><div class="metric-val a" id="pt-openval">$0</div><div class="metric-sub">at avg buy price</div></div>
+    <div class="metric-box"><div class="metric-label">Realised P&amp;L</div><div class="metric-val" id="pt-return">0.0%</div><div class="metric-sub">closed trades only</div></div>
     <div class="metric-box"><div class="metric-label">Win rate</div><div class="metric-val" id="pt-winrate">—</div></div>
     <div class="metric-box"><div class="metric-label">Total trades</div><div class="metric-val" id="pt-count">0</div></div>
   </div>
@@ -751,7 +746,6 @@ new Chart(document.getElementById('btDDChart'), {{
 
 // ─── Paper trades ─────────────────────────────────────────────────
 let trades = JSON.parse(localStorage.getItem('jyts_trades') || '[]');
-let cashBalance = 100000;
 document.getElementById('t-date').value = new Date().toISOString().split('T')[0];
 renderTrades();
 
@@ -769,26 +763,60 @@ function logTrade() {{
   document.getElementById('t-price').value = '';
   document.getElementById('t-shares').value = '';
 }}
+
 function clearTrades() {{
   if (!confirm('Clear all paper trades?')) return;
-  trades = []; cashBalance = 100000;
+  trades = [];
   localStorage.setItem('jyts_trades', JSON.stringify(trades));
   renderTrades();
 }}
+
 function renderTrades() {{
-  cashBalance = 100000;
-  let buys = 0, sells = 0;
+  let openPositions = {{}};
+  let realisedPnL = 0;
+  let wins = 0, losses = 0;
+
   trades.forEach(t => {{
-    if (t.action === 'BUY') {{ cashBalance -= t.value; buys++; }}
-    if (t.action === 'SELL') {{ cashBalance += t.value; sells++; }}
+    if (t.action === 'BUY') {{
+      if (!openPositions[t.ticker]) openPositions[t.ticker] = {{ shares: 0, cost: 0 }};
+      openPositions[t.ticker].shares += t.shares;
+      openPositions[t.ticker].cost += t.value;
+    }}
+    if (t.action === 'SELL') {{
+      const pos = openPositions[t.ticker];
+      if (pos && pos.shares > 0) {{
+        const avgCost = pos.cost / pos.shares;
+        const pnl = (t.price - avgCost) * t.shares;
+        realisedPnL += pnl;
+        if (pnl >= 0) wins++; else losses++;
+        pos.shares -= t.shares;
+        pos.cost = pos.shares * avgCost;
+        if (pos.shares <= 0) delete openPositions[t.ticker];
+      }}
+    }}
   }});
-  const ret = (cashBalance - 100000) / 100000 * 100;
-  document.getElementById('pt-portfolio').textContent = '$' + cashBalance.toLocaleString('en-AU', {{ maximumFractionDigits: 0 }});
+
+  // Open position value — use last known buy price as proxy
+  let openValue = 0;
+  const tickersSeen = {{}};
+  trades.slice().reverse().forEach(t => {{
+    if (openPositions[t.ticker] && !tickersSeen[t.ticker] && t.action === 'BUY') {{
+      openValue += openPositions[t.ticker].shares * t.price;
+      tickersSeen[t.ticker] = true;
+    }}
+  }});
+
+  const portfolioVal = 100000 + realisedPnL + openValue;
+  const ret = realisedPnL / 100000 * 100;
+
+  document.getElementById('pt-portfolio').textContent = '$' + portfolioVal.toLocaleString('en-AU', {{ maximumFractionDigits: 0 }});
+  document.getElementById('pt-openval').textContent = '$' + openValue.toLocaleString('en-AU', {{ maximumFractionDigits: 0 }});
   const retEl = document.getElementById('pt-return');
   retEl.textContent = (ret >= 0 ? '+' : '') + ret.toFixed(2) + '%';
   retEl.className = 'metric-val ' + (ret >= 0 ? 'g' : 'r');
   document.getElementById('pt-count').textContent = trades.length;
-  document.getElementById('pt-winrate').textContent = trades.length ? (sells + buys > 0 ? Math.round(sells/(buys||1)*50) + '%' : '—') : '—';
+  document.getElementById('pt-winrate').textContent = (wins + losses) > 0 ? Math.round(wins / (wins + losses) * 100) + '%' : '—';
+
   const tbody = document.getElementById('trade-tbody');
   if (!trades.length) {{
     tbody.innerHTML = '<tr><td colspan="8" style="color:var(--text3);padding:24px 12px;text-align:center;font-family:\\'DM Mono\\',monospace;font-size:12px;">No trades logged yet</td></tr>';
@@ -812,7 +840,6 @@ function renderTrades() {{
 </html>"""
 
 def hash_password(password):
-    """Matches JS: let h=0; for(c) h=(31*h+charCode)|0; return h.toString(36)"""
     import ctypes
     h = ctypes.c_int32(0)
     for c in password:
@@ -828,7 +855,6 @@ def hash_password(password):
         n //= 36
     return ('-' if negative else '') + result
 
-# Patch the hash into the template
 generate_html.__doc__ = "patched"
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
@@ -877,7 +903,6 @@ def main():
     backtest_data = run_backtest(df)
     print(f"  Backtest: Return={backtest_data['total_return']:+.1f}% | MaxDD={backtest_data['max_dd']:.1f}% | WinRate={backtest_data['win_rate']:.0f}%")
 
-    # Fix password hash in HTML generation
     pw_hash = hash_password("Youarewhoyouthinkyouare")
 
     html = generate_html(signal_data, chart_data, backtest_data, build_time, tz_name)
