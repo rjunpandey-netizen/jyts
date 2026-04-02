@@ -188,6 +188,65 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 .etf-price-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace}
 .etf-price-val{font-size:18px;font-weight:700;font-family:'DM Mono',monospace;color:var(--accent-dark)}
 
+/* ── Pulse Banner ── */
+.pulse-banner{background:#0a1929;border-bottom:1px solid #1a3a5c;padding:10px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px;border-radius:var(--radius)}
+.pulse-label{font-size:10px;font-weight:700;color:#90b8d4;font-family:'DM Mono',monospace;letter-spacing:2px;text-transform:uppercase;white-space:nowrap}
+.pulse-track{flex:1;overflow:hidden;min-width:0}
+.pulse-scroll{display:flex;gap:24px;animation:pulse-scroll 30s linear infinite;width:max-content}
+@keyframes pulse-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.pulse-item{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.pulse-ticker{font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:#e2e8f0}
+.pulse-price{font-family:'DM Mono',monospace;font-size:12px}
+.pulse-badge{font-size:9px;font-weight:700;font-family:'DM Mono',monospace;padding:2px 6px;border-radius:4px;color:#fff}
+.pulse-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:10px;font-family:'DM Mono',monospace;white-space:nowrap}
+.pulse-legend-item{opacity:0.8}
+
+/* ── High Conviction Section ── */
+.hc-section{background:#0d1f2d;border:1px solid #1a3a5c;border-radius:var(--radius);padding:24px;margin-bottom:20px}
+.hc-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.hc-title{font-family:'Inter',sans-serif;font-size:16px;font-weight:700;color:#e2e8f0;letter-spacing:-0.3px}
+.hc-sub{font-size:11px;color:#475569;font-family:'DM Mono',monospace;margin-top:4px}
+.hc-stat-pill{background:#112233;border:1px solid #1a3a5c;border-radius:8px;padding:8px 14px;text-align:center}
+.hc-stat-label{font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace;display:block;margin-bottom:3px}
+.hc-stat-val{font-size:15px;font-weight:700;font-family:'DM Mono',monospace;color:#90b8d4}
+
+/* ── HC Table (dark) ── */
+.hc-table{width:100%;border-collapse:collapse;font-size:13px}
+.hc-table th{font-size:10px;color:#475569;text-align:left;padding:9px 12px;border-bottom:1px solid #1a3a5c;text-transform:uppercase;letter-spacing:1px;font-weight:500;font-family:'DM Mono',monospace}
+.hc-table td{padding:13px 12px;border-bottom:1px solid #112233;vertical-align:middle}
+.hc-table tr:last-child td{border-bottom:none}
+.hc-table tr:hover td{background:#112233}
+.pos-dark{color:#22c55e;font-family:'DM Mono',monospace}
+.neg-dark{color:#ef4444;font-family:'DM Mono',monospace}
+
+/* ── Strategy mini badges ── */
+.strat-mini-badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;font-family:'DM Mono',monospace;margin-right:3px}
+.strat-ob{background:#78350f;color:#fbbf24}
+.strat-mc{background:#1e3a8a;color:#93c5fd}
+.strat-pb{background:#3b0764;color:#c4b5fd}
+.strat-vb{background:#064e3b;color:#6ee7b7}
+
+/* ── HC Rules ── */
+.hc-rules{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
+.hc-rule-item{display:flex;align-items:flex-start;gap:12px;background:#112233;border-radius:8px;padding:14px}
+.hc-rule-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.hc-rule-title{font-size:12px;font-weight:600;color:#e2e8f0;margin-bottom:4px}
+.hc-rule-body{font-size:11px;color:#64748b;line-height:1.6}
+
+/* ── Dark metrics ── */
+.dark-metric{background:#112233;border:1px solid #1a3a5c;border-radius:8px;padding:14px 18px}
+.dark-metric-label{font-size:10px;color:#475569;text-transform:uppercase;letter-spacing:1px;font-family:'DM Mono',monospace;margin-bottom:6px}
+.dark-metric-val{font-size:20px;font-weight:700;font-family:'DM Mono',monospace;color:#e2e8f0}
+
+/* ── Dark form inputs ── */
+.dark-input{background:#112233;border:1px solid #1a3a5c;border-radius:8px;padding:10px 13px;color:#e2e8f0;font-size:13px;font-family:'Inter',sans-serif;width:100%;outline:none;transition:border-color .15s}
+.dark-input:focus{border-color:#90b8d4}
+.dark-input::placeholder{color:#1e3a5c}
+.btn-dark-add{background:#1a3a5c;color:#90b8d4;border:1px solid #2563a8;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;transition:background .15s;align-self:flex-end}
+.btn-dark-add:hover{background:#2563a8;color:#fff}
+.btn-dark-del{background:none;border:none;cursor:pointer;color:#475569;font-size:14px;padding:4px 8px;border-radius:6px;transition:all .15s}
+.btn-dark-del:hover{color:#ef4444;background:rgba(239,68,68,0.1)}
+
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-track{background:var(--bg3)}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
@@ -245,7 +304,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
     <div class="nav-item" onclick="showTab('guide',this)"><span class="nav-icon">◌</span> How to Use</div>
   </div>
   <div class="sb-footer">
-    Built: 02 Apr 2026 10:07 PM AEDT<br>
+    Built: 02 Apr 2026 11:19 PM AEDT<br>
     Auto-updates 4:15pm daily<br><br>
     Not financial advice.<br>
     Paper trading only.
@@ -260,7 +319,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   <div class="page-header">
     <div>
       <div class="page-title">Dashboard</div>
-      <div class="page-sub">Updated 02 Apr 2026 10:07 PM AEDT</div>
+      <div class="page-sub">Updated 02 Apr 2026 11:19 PM AEDT</div>
     </div>
     <div class="build-badge">Auto-updates 4:15pm AEST/AEDT</div>
   </div>
@@ -480,472 +539,363 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
 <!-- ══════════ ASX STOCKS ══════════ -->
 <div id="tab-stocks" class="tab">
-  <div class="page-header">
-    <div>
-      <div class="page-title">ASX Stocks — Top 5 Swing Picks</div>
-      <div class="page-sub">Updated 02 Apr 2026 10:07 PM AEDT · All industries · Scored across momentum + pullback strategies</div>
+
+  <!-- ── LIVE PULSE BANNER ── -->
+  <div class="pulse-banner">
+    <div class="pulse-label">LIVE PULSE</div>
+    <div class="pulse-track">
+      <div class="pulse-scroll">
+        <span class="pulse-item">
+          <span class="pulse-ticker">WHC.ASX</span>
+          <span class="pulse-price" style="color:#ef4444">▼ $9.08 (-1.7%)</span>
+          <span class="pulse-badge" style="background:#3b82f6">MC</span>
+        </span><span class="pulse-item">
+          <span class="pulse-ticker">BHP.ASX</span>
+          <span class="pulse-price" style="color:#ef4444">▼ $51.23 (-2.5%)</span>
+          <span class="pulse-badge" style="background:#3b82f6">MC</span>
+        </span><span class="pulse-item">
+          <span class="pulse-ticker">RIO.ASX</span>
+          <span class="pulse-price" style="color:#ef4444">▼ $161.62 (-3.3%)</span>
+          <span class="pulse-badge" style="background:#3b82f6">MC</span>
+        </span><span class="pulse-item">
+          <span class="pulse-ticker">WOW.ASX</span>
+          <span class="pulse-price" style="color:#22c55e">▲ $37.01 (+1.3%)</span>
+          <span class="pulse-badge" style="background:#8b5cf6">PB</span>
+        </span><span class="pulse-item">
+          <span class="pulse-ticker">WHC.ASX</span>
+          <span class="pulse-price" style="color:#ef4444">▼ $9.08 (-1.7%)</span>
+          <span class="pulse-badge" style="background:#3b82f6">MC</span>
+        </span><span class="pulse-item">
+          <span class="pulse-ticker">BHP.ASX</span>
+          <span class="pulse-price" style="color:#ef4444">▼ $51.23 (-2.5%)</span>
+          <span class="pulse-badge" style="background:#3b82f6">MC</span>
+        </span><span class="pulse-item">
+          <span class="pulse-ticker">RIO.ASX</span>
+          <span class="pulse-price" style="color:#ef4444">▼ $161.62 (-3.3%)</span>
+          <span class="pulse-badge" style="background:#3b82f6">MC</span>
+        </span><span class="pulse-item">
+          <span class="pulse-ticker">WOW.ASX</span>
+          <span class="pulse-price" style="color:#22c55e">▲ $37.01 (+1.3%)</span>
+          <span class="pulse-badge" style="background:#8b5cf6">PB</span>
+        </span>
+      </div>
     </div>
-    <div class="build-badge">Refreshes daily at build</div>
+    <div class="pulse-legend">
+      <span class="pulse-legend-item" style="color:#f59e0b">OB Oversold Bounce</span>
+      <span class="pulse-legend-item" style="color:#3b82f6">MC Momentum</span>
+      <span class="pulse-legend-item" style="color:#8b5cf6">PB Pullback</span>
+      <span class="pulse-legend-item" style="color:#10b981">VB Vol Breakout</span>
+    </div>
   </div>
 
-  <div class="info-box">
-    <strong>How stocks are scored:</strong> Each stock is ranked across 6 criteria — momentum (above SMA20 &amp; SMA50), RSI zone, pullback to SMA20, volume confirmation, Bollinger Band position, and 3-month return. Stocks scoring highest across multiple strategies surface to the top. Not financial advice — paper trade first.
-  </div>
+  <!-- ── HIGH CONVICTION COMMAND CENTRE ── -->
+  <div class="hc-section">
+    <div class="hc-header">
+      <div>
+        <div class="hc-title">High Conviction Setups</div>
+        <div class="hc-sub">Top 4 · 1:3 R/R enforced · Above SMA200 · $500K+ daily liquidity · Updated 02 Apr 2026 11:19 PM AEDT</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <div class="hc-stat-pill"><span class="hc-stat-label">Capital</span><span class="hc-stat-val">$10,000</span></div>
+        <div class="hc-stat-pill"><span class="hc-stat-label">Per Trade</span><span class="hc-stat-val">$3,333</span></div>
+        <div class="hc-stat-pill"><span class="hc-stat-label">Brokerage</span><span class="hc-stat-val">$3.00</span></div>
+        <div class="hc-stat-pill"><span class="hc-stat-label">Max Positions</span><span class="hc-stat-val">3</span></div>
+      </div>
+    </div>
 
-  <div class="tip-box">
-    <strong>💡 Swing trading basics</strong>
-    Swing trading means holding for days to months — not all day. Your edge: buy strong stocks that have pulled back slightly, then ride the next leg up. Stop loss = 3% below SMA20. Target = 2× your risk. For $500–$10K positions, stick to ASX-listed stocks with good daily volume.
-  </div>
-
-  <!-- Stock cards (mobile-friendly) -->
-  <div id="stock-cards">
-    
-        <div class="stock-card">
-          <div class="stock-card-header">
-            <div>
-              <span class="stock-rank">#1</span>
-              <span class="stock-ticker">TNE.AX</span>
-              <span class="badge badge-mid" style="margin-left:8px">Momentum</span>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:20px;font-weight:700;font-family:'DM Mono',monospace">$26.91</div>
-              <div style="font-size:12px;color:#b91c1c;font-family:'DM Mono',monospace">▼ 3.5% today</div>
-            </div>
-          </div>
-          <div class="stock-signals">Above SMA20 · Above SMA50 · RSI 53 — momentum zone</div>
-          <div class="stock-stats">
-            <div class="sstat"><div class="sstat-label">RSI</div><div class="sstat-val">53</div></div>
-            <div class="sstat"><div class="sstat-label">1M Return</div><div class="sstat-val" style="color:#15803d">+2.3%</div></div>
-            <div class="sstat"><div class="sstat-label">3M Return</div><div class="sstat-val" style="color:#b91c1c">-1.8%</div></div>
-            <div class="sstat"><div class="sstat-label">Vol Ratio</div><div class="sstat-val">0.8×</div></div>
-          </div>
-          <div class="stock-rr">
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-              <span style="color:#b91c1c;font-size:12px;font-family:'DM Mono',monospace">Stop: $26.00 (3.4% risk)</span>
-              <span style="color:#15803d;font-size:12px;font-family:'DM Mono',monospace">Target: $28.73 (6.8% gain)</span>
-            </div>
-            <div style="font-size:11px;color:#90b8d4">Score: 90 / 100</div>
-          </div>
-        </div>
-        <div class="stock-card">
-          <div class="stock-card-header">
-            <div>
-              <span class="stock-rank">#2</span>
-              <span class="stock-ticker">WHC.AX</span>
-              <span class="badge badge-mid" style="margin-left:8px">Momentum</span>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:20px;font-weight:700;font-family:'DM Mono',monospace">$9.08</div>
-              <div style="font-size:12px;color:#b91c1c;font-family:'DM Mono',monospace">▼ 1.7% today</div>
-            </div>
-          </div>
-          <div class="stock-signals">Above SMA20 · Above SMA50 · RSI 46 — momentum zone</div>
-          <div class="stock-stats">
-            <div class="sstat"><div class="sstat-label">RSI</div><div class="sstat-val">46</div></div>
-            <div class="sstat"><div class="sstat-label">1M Return</div><div class="sstat-val" style="color:#15803d">+4.4%</div></div>
-            <div class="sstat"><div class="sstat-label">3M Return</div><div class="sstat-val" style="color:#15803d">+17.8%</div></div>
-            <div class="sstat"><div class="sstat-label">Vol Ratio</div><div class="sstat-val">0.6×</div></div>
-          </div>
-          <div class="stock-rr">
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-              <span style="color:#b91c1c;font-size:12px;font-family:'DM Mono',monospace">Stop: $8.78 (3.3% risk)</span>
-              <span style="color:#15803d;font-size:12px;font-family:'DM Mono',monospace">Target: $9.68 (6.7% gain)</span>
-            </div>
-            <div style="font-size:11px;color:#90b8d4">Score: 86 / 100</div>
-          </div>
-        </div>
-        <div class="stock-card">
-          <div class="stock-card-header">
-            <div>
-              <span class="stock-rank">#3</span>
-              <span class="stock-ticker">CBA.AX</span>
-              <span class="badge badge-mid" style="margin-left:8px">Pullback</span>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:20px;font-weight:700;font-family:'DM Mono',monospace">$172.80</div>
-              <div style="font-size:12px;color:#15803d;font-family:'DM Mono',monospace">▲ 0.5% today</div>
-            </div>
-          </div>
-          <div class="stock-signals">Above SMA50 · RSI 48 — momentum zone · Pullback to SMA20 (-0.1%) — entry zone</div>
-          <div class="stock-stats">
-            <div class="sstat"><div class="sstat-label">RSI</div><div class="sstat-val">48</div></div>
-            <div class="sstat"><div class="sstat-label">1M Return</div><div class="sstat-val" style="color:#15803d">+0.1%</div></div>
-            <div class="sstat"><div class="sstat-label">3M Return</div><div class="sstat-val" style="color:#15803d">+9.0%</div></div>
-            <div class="sstat"><div class="sstat-label">Vol Ratio</div><div class="sstat-val">0.9×</div></div>
-          </div>
-          <div class="stock-rr">
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-              <span style="color:#b91c1c;font-size:12px;font-family:'DM Mono',monospace">Stop: $167.76 (2.9% risk)</span>
-              <span style="color:#15803d;font-size:12px;font-family:'DM Mono',monospace">Target: $182.88 (5.8% gain)</span>
-            </div>
-            <div style="font-size:11px;color:#90b8d4">Score: 68 / 100</div>
-          </div>
-        </div>
-        <div class="stock-card">
-          <div class="stock-card-header">
-            <div>
-              <span class="stock-rank">#4</span>
-              <span class="stock-ticker">BHP.AX</span>
-              <span class="badge badge-mid" style="margin-left:8px">Breakout Watch</span>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:20px;font-weight:700;font-family:'DM Mono',monospace">$51.23</div>
-              <div style="font-size:12px;color:#b91c1c;font-family:'DM Mono',monospace">▼ 2.5% today</div>
-            </div>
-          </div>
-          <div class="stock-signals">Above SMA20 · Above SMA50 · RSI 56 — momentum zone</div>
-          <div class="stock-stats">
-            <div class="sstat"><div class="sstat-label">RSI</div><div class="sstat-val">56</div></div>
-            <div class="sstat"><div class="sstat-label">1M Return</div><div class="sstat-val" style="color:#b91c1c">-7.1%</div></div>
-            <div class="sstat"><div class="sstat-label">3M Return</div><div class="sstat-val" style="color:#15803d">+12.3%</div></div>
-            <div class="sstat"><div class="sstat-label">Vol Ratio</div><div class="sstat-val">0.7×</div></div>
-          </div>
-          <div class="stock-rr">
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-              <span style="color:#b91c1c;font-size:12px;font-family:'DM Mono',monospace">Stop: $48.63 (5.1% risk)</span>
-              <span style="color:#15803d;font-size:12px;font-family:'DM Mono',monospace">Target: $56.43 (10.2% gain)</span>
-            </div>
-            <div style="font-size:11px;color:#90b8d4">Score: 56 / 100</div>
-          </div>
-        </div>
-        <div class="stock-card">
-          <div class="stock-card-header">
-            <div>
-              <span class="stock-rank">#5</span>
-              <span class="stock-ticker">RIO.AX</span>
-              <span class="badge badge-mid" style="margin-left:8px">Breakout Watch</span>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:20px;font-weight:700;font-family:'DM Mono',monospace">$161.62</div>
-              <div style="font-size:12px;color:#b91c1c;font-family:'DM Mono',monospace">▼ 3.3% today</div>
-            </div>
-          </div>
-          <div class="stock-signals">Above SMA20 · Above SMA50 · RSI 54 — momentum zone</div>
-          <div class="stock-stats">
-            <div class="sstat"><div class="sstat-label">RSI</div><div class="sstat-val">54</div></div>
-            <div class="sstat"><div class="sstat-label">1M Return</div><div class="sstat-val" style="color:#b91c1c">-1.8%</div></div>
-            <div class="sstat"><div class="sstat-label">3M Return</div><div class="sstat-val" style="color:#15803d">+10.5%</div></div>
-            <div class="sstat"><div class="sstat-label">Vol Ratio</div><div class="sstat-val">0.8×</div></div>
-          </div>
-          <div class="stock-rr">
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-              <span style="color:#b91c1c;font-size:12px;font-family:'DM Mono',monospace">Stop: $150.00 (7.2% risk)</span>
-              <span style="color:#15803d;font-size:12px;font-family:'DM Mono',monospace">Target: $184.86 (14.4% gain)</span>
-            </div>
-            <div style="font-size:11px;color:#90b8d4">Score: 56 / 100</div>
-          </div>
-        </div>
-  </div>
-
-  <!-- Stock table (desktop) -->
-  <div class="card" style="margin-bottom:24px">
-    <div class="card-header"><div class="card-title">Ranked Candidates — Today's Top 5</div></div>
     <div style="overflow-x:auto">
-      <table class="data-table">
+      <table class="hc-table">
+        <thead><tr>
+          <th>Ticker</th>
+          <th>Strategy</th>
+          <th>Entry</th>
+          <th>Stop Loss</th>
+          <th>Target (3R)</th>
+          <th>Exit Signal (Trailing)</th>
+          <th>Why High Conviction?</th>
+        </tr></thead>
+        <tbody id="hc-tbody"><tr>
+          <td>
+            <div style="font-weight:700;font-size:15px;color:#e2e8f0">WHC.ASX</div>
+            <div style="font-size:10px;color:#90b8d4;margin-top:2px">Energy</div>
+          </td>
+          <td>
+            <span style="display:inline-block;background:#eff6ff;color:#3b82f6;border:1px solid #3b82f6;
+              border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;font-family:'DM Mono',monospace">
+              Momentum <span style="font-size:9px;color:#90b8d4">+1</span>
+            </span>
+          </td>
+          <td style="font-family:'DM Mono',monospace;font-weight:600;color:#e2e8f0">$9.08</td>
+          <td style="font-family:'DM Mono',monospace;color:#ef4444">$9.05
+            <div style="font-size:10px;color:#6b7280">−0.3% · ATR $0.49</div>
+          </td>
+          <td style="font-family:'DM Mono',monospace;color:#22c55e">$9.17
+            <div style="font-size:10px;color:#6b7280">R/R 3.0:1</div>
+          </td>
+          <td style="font-size:11px;color:#94a3b8;max-width:160px">RSI > 80 or close below SMA20</td>
+          <td style="font-size:11px;color:#94a3b8;max-width:180px">2 strategies confluent · RSI 46 — momentum sweet spot · Tight SMA20 touch</td>
+        </tr><tr>
+          <td>
+            <div style="font-weight:700;font-size:15px;color:#e2e8f0">BHP.ASX</div>
+            <div style="font-size:10px;color:#90b8d4;margin-top:2px">Resources</div>
+          </td>
+          <td>
+            <span style="display:inline-block;background:#eff6ff;color:#3b82f6;border:1px solid #3b82f6;
+              border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;font-family:'DM Mono',monospace">
+              Momentum <span style="font-size:9px;color:#90b8d4">+1</span>
+            </span>
+          </td>
+          <td style="font-family:'DM Mono',monospace;font-weight:600;color:#e2e8f0">$51.23</td>
+          <td style="font-family:'DM Mono',monospace;color:#ef4444">$50.13
+            <div style="font-size:10px;color:#6b7280">−2.1% · ATR $1.37</div>
+          </td>
+          <td style="font-family:'DM Mono',monospace;color:#22c55e">$54.52
+            <div style="font-size:10px;color:#6b7280">R/R 3.0:1</div>
+          </td>
+          <td style="font-size:11px;color:#94a3b8;max-width:160px">RSI > 80 or close below SMA20</td>
+          <td style="font-size:11px;color:#94a3b8;max-width:180px">2 strategies confluent · RSI 56 — momentum sweet spot</td>
+        </tr><tr>
+          <td>
+            <div style="font-weight:700;font-size:15px;color:#e2e8f0">RIO.ASX</div>
+            <div style="font-size:10px;color:#90b8d4;margin-top:2px">Resources</div>
+          </td>
+          <td>
+            <span style="display:inline-block;background:#eff6ff;color:#3b82f6;border:1px solid #3b82f6;
+              border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;font-family:'DM Mono',monospace">
+              Momentum
+            </span>
+          </td>
+          <td style="font-family:'DM Mono',monospace;font-weight:600;color:#e2e8f0">$161.62</td>
+          <td style="font-family:'DM Mono',monospace;color:#ef4444">$156.37
+            <div style="font-size:10px;color:#6b7280">−3.2% · ATR $5.25</div>
+          </td>
+          <td style="font-family:'DM Mono',monospace;color:#22c55e">$177.36
+            <div style="font-size:10px;color:#6b7280">R/R 3.0:1</div>
+          </td>
+          <td style="font-size:11px;color:#94a3b8;max-width:160px">RSI > 80 or close below SMA20</td>
+          <td style="font-size:11px;color:#94a3b8;max-width:180px">RSI 54 — momentum sweet spot</td>
+        </tr><tr>
+          <td>
+            <div style="font-weight:700;font-size:15px;color:#e2e8f0">WOW.ASX</div>
+            <div style="font-size:10px;color:#90b8d4;margin-top:2px">Consumer</div>
+          </td>
+          <td>
+            <span style="display:inline-block;background:#f5f3ff;color:#8b5cf6;border:1px solid #8b5cf6;
+              border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;font-family:'DM Mono',monospace">
+              SMA20 Pullback
+            </span>
+          </td>
+          <td style="font-family:'DM Mono',monospace;font-weight:600;color:#e2e8f0">$37.01</td>
+          <td style="font-family:'DM Mono',monospace;color:#ef4444">$36.35
+            <div style="font-size:10px;color:#6b7280">−1.8% · ATR $0.66</div>
+          </td>
+          <td style="font-family:'DM Mono',monospace;color:#22c55e">$38.98
+            <div style="font-size:10px;color:#6b7280">R/R 3.0:1</div>
+          </td>
+          <td style="font-size:11px;color:#94a3b8;max-width:160px">Close below SMA20</td>
+          <td style="font-size:11px;color:#94a3b8;max-width:180px"></td>
+        </tr></tbody>
+      </table>
+    </div>
+
+    <div class="hc-rules">
+      <div class="hc-rule-item">
+        <div class="hc-rule-icon" style="background:#1a3a5c">⚡</div>
+        <div><div class="hc-rule-title">Safety Switch</div><div class="hc-rule-body">All stocks must be above SMA200. If any holding drops below its SMA200 — exit immediately, no exceptions.</div></div>
+      </div>
+      <div class="hc-rule-item">
+        <div class="hc-rule-icon" style="background:#15803d">🆓</div>
+        <div><div class="hc-rule-title">The Free Ride</div><div class="hc-rule-body">Once a position is up 10%, move your stop loss to entry price. You now have a zero-risk trade — let it run.</div></div>
+      </div>
+      <div class="hc-rule-item">
+        <div class="hc-rule-icon" style="background:#b91c1c">🛡️</div>
+        <div><div class="hc-rule-title">Risk Cap</div><div class="hc-rule-body">Maximum $100 risk per trade (1% of $10K). If the stop distance is too wide, reduce shares — never widen the stop.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ACTIVE PORTFOLIO TRACKER ── -->
+  <div class="hc-section" style="margin-bottom:24px">
+    <div class="hc-header">
+      <div class="hc-title">Active Portfolio Tracker</div>
+      <div style="font-size:11px;color:#475569;font-family:'DM Mono',monospace">Log positions below · P/L calculated from entry</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px">
+      <div class="dark-metric"><div class="dark-metric-label">Total Value</div><div class="dark-metric-val" id="sc-total">$10,000</div></div>
+      <div class="dark-metric"><div class="dark-metric-label">Open P/L</div><div class="dark-metric-val" id="sc-pnl" style="color:#22c55e">+$0</div></div>
+      <div class="dark-metric"><div class="dark-metric-label">Open Positions</div><div class="dark-metric-val" id="sc-positions">0 / 3</div></div>
+      <div class="dark-metric"><div class="dark-metric-label">Brokerage Paid</div><div class="dark-metric-val" id="sc-brokerage" style="color:#f59e0b">$0</div></div>
+    </div>
+
+    <!-- Position entry form -->
+    <div style="display:grid;grid-template-columns:repeat(5,1fr) auto;gap:10px;margin-bottom:16px;align-items:end">
+      <div class="form-group">
+        <label class="form-label" style="color:#64748b">Ticker</label>
+        <input class="dark-input" type="text" id="sc-ticker" placeholder="e.g. TLX" style="text-transform:uppercase">
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="color:#64748b">Entry $</label>
+        <input class="dark-input" type="number" id="sc-entry" placeholder="0.00" step="0.01">
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="color:#64748b">Shares</label>
+        <input class="dark-input" type="number" id="sc-shares" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="color:#64748b">Current $</label>
+        <input class="dark-input" type="number" id="sc-current" placeholder="0.00" step="0.01">
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="color:#64748b">Stop $</label>
+        <input class="dark-input" type="number" id="sc-stop-input" placeholder="0.00" step="0.01">
+      </div>
+      <button class="btn-dark-add" onclick="addPosition()">+ Add</button>
+    </div>
+
+    <div style="overflow-x:auto">
+      <table class="hc-table" style="font-size:12px">
+        <thead><tr>
+          <th>Ticker</th><th>Entry</th><th>Current</th><th>Shares</th>
+          <th>Cost</th><th>Value</th><th>P/L $</th><th>P/L %</th>
+          <th>Stop</th><th>Free Ride?</th><th></th>
+        </tr></thead>
+        <tbody id="sc-tbody">
+          <tr><td colspan="11" style="text-align:center;padding:24px;color:#475569;font-family:'DM Mono',monospace;font-size:12px">No active positions. Add one above.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── RESEARCH PHASE — 10 CANDIDATES ── -->
+  <div class="hc-section" style="margin-bottom:24px">
+    <div class="hc-header">
+      <div>
+        <div class="hc-title">Research Phase — All Candidates</div>
+        <div class="hc-sub">All stocks passing hard filters today (above SMA200 + $500K liquidity + triggered a strategy)</div>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="hc-table" style="font-size:12px">
         <thead><tr>
           <th>#</th><th>Stock</th><th>Price</th><th>Today</th>
-          <th>Sector</th><th>Setup</th><th>RSI</th><th>1M Ret</th><th>3M Ret</th>
-          <th>Volume</th><th>Score</th><th>Risk / Target</th>
+          <th>Strategies</th><th>RSI</th><th>SMA200</th><th>Volume</th>
+          <th>Stop</th><th>Target</th>
         </tr></thead>
         <tbody><tr>
-          <td style="font-weight:700;color:#1a3a5c;font-family:'DM Mono',monospace">1</td>
+          <td style="color:#64748b;font-family:'DM Mono',monospace;font-size:11px">1</td>
           <td>
-            <div style="font-weight:700;font-size:15px;color:#1e2a38">TNE</div>
-            <div style="font-size:11px;color:#90b8d4;margin-top:2px"><span class="sig-chip">Above SMA20</span> · <span class="sig-chip">Above SMA50</span> · <span class="sig-chip">RSI 53 — momentum zone</span></div>
+            <span style="font-weight:600;color:#e2e8f0">WHC</span>
+            <span style="font-size:10px;color:#475569;margin-left:6px">Energy</span>
           </td>
-          <td style="font-family:'DM Mono',monospace;font-weight:600">$26.91</td>
-          <td class="neg" style="font-family:'DM Mono',monospace">▼ 3.5%</td>
-          <td style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">Technology</td>
-          <td><span class="badge badge-up">Momentum</span></td>
-          <td style="font-family:'DM Mono',monospace;color:var(--green)">53</td>
-          <td class="pos" style="font-family:'DM Mono',monospace">+2.3%</td>
-          <td class="neg" style="font-family:'DM Mono',monospace">-1.8%</td>
-          <td style="font-family:'DM Mono',monospace;color:#90b8d4">0.8×</td>
-          <td>
-            <div style="display:flex;align-items:center;gap:8px">
-              <div style="background:#e8f0f8;border-radius:4px;height:6px;width:80px;overflow:hidden">
-                <div style="background:#1a3a5c;height:6px;width:90%;border-radius:4px"></div>
-              </div>
-              <span style="font-family:'DM Mono',monospace;font-size:11px;color:#90b8d4">90</span>
-            </div>
-          </td>
-          <td style="font-size:11px;font-family:'DM Mono',monospace">
-            <span style="color:var(--red)">Stop $26.00</span><br>
-            <span style="color:var(--green)">T1 $28.73</span>
-          </td>
+          <td style="font-family:'DM Mono',monospace;color:#e2e8f0">$9.08</td>
+          <td class="neg-dark" style="font-family:'DM Mono',monospace">▼ 1.7%</td>
+          <td><span class="strat-mini-badge strat-mc">MC</span> <span class="strat-mini-badge strat-pb">PB</span></td>
+          <td style="font-family:'DM Mono',monospace;color:#22c55e">46</td>
+          <td style="font-family:'DM Mono',monospace;color:#64748b">$7.33 <span style="color:#22c55e;font-size:10px">+23.8%</span></td>
+          <td style="font-family:'DM Mono',monospace;color:#64748b">0.6× <span style="font-size:10px;color:#475569">$71348K/day</span></td>
+          <td style="font-family:'DM Mono',monospace;color:#ef4444">$9.05</td>
+          <td style="font-family:'DM Mono',monospace;color:#22c55e">$9.17</td>
         </tr><tr>
-          <td style="font-weight:700;color:#1a3a5c;font-family:'DM Mono',monospace">2</td>
+          <td style="color:#64748b;font-family:'DM Mono',monospace;font-size:11px">2</td>
           <td>
-            <div style="font-weight:700;font-size:15px;color:#1e2a38">WHC</div>
-            <div style="font-size:11px;color:#90b8d4;margin-top:2px"><span class="sig-chip">Above SMA20</span> · <span class="sig-chip">Above SMA50</span> · <span class="sig-chip">RSI 46 — momentum zone</span></div>
+            <span style="font-weight:600;color:#e2e8f0">BHP</span>
+            <span style="font-size:10px;color:#475569;margin-left:6px">Resources</span>
           </td>
-          <td style="font-family:'DM Mono',monospace;font-weight:600">$9.08</td>
-          <td class="neg" style="font-family:'DM Mono',monospace">▼ 1.7%</td>
-          <td style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">Energy</td>
-          <td><span class="badge badge-up">Momentum</span></td>
-          <td style="font-family:'DM Mono',monospace;color:var(--green)">46</td>
-          <td class="pos" style="font-family:'DM Mono',monospace">+4.4%</td>
-          <td class="pos" style="font-family:'DM Mono',monospace">+17.8%</td>
-          <td style="font-family:'DM Mono',monospace;color:#90b8d4">0.6×</td>
-          <td>
-            <div style="display:flex;align-items:center;gap:8px">
-              <div style="background:#e8f0f8;border-radius:4px;height:6px;width:80px;overflow:hidden">
-                <div style="background:#1a3a5c;height:6px;width:85%;border-radius:4px"></div>
-              </div>
-              <span style="font-family:'DM Mono',monospace;font-size:11px;color:#90b8d4">86</span>
-            </div>
-          </td>
-          <td style="font-size:11px;font-family:'DM Mono',monospace">
-            <span style="color:var(--red)">Stop $8.78</span><br>
-            <span style="color:var(--green)">T1 $9.68</span>
-          </td>
+          <td style="font-family:'DM Mono',monospace;color:#e2e8f0">$51.23</td>
+          <td class="neg-dark" style="font-family:'DM Mono',monospace">▼ 2.5%</td>
+          <td><span class="strat-mini-badge strat-mc">MC</span> <span class="strat-mini-badge strat-pb">PB</span></td>
+          <td style="font-family:'DM Mono',monospace;color:#22c55e">56</td>
+          <td style="font-family:'DM Mono',monospace;color:#64748b">$43.61 <span style="color:#22c55e;font-size:10px">+17.5%</span></td>
+          <td style="font-family:'DM Mono',monospace;color:#64748b">0.7× <span style="font-size:10px;color:#475569">$583185K/day</span></td>
+          <td style="font-family:'DM Mono',monospace;color:#ef4444">$50.13</td>
+          <td style="font-family:'DM Mono',monospace;color:#22c55e">$54.52</td>
         </tr><tr>
-          <td style="font-weight:700;color:#1a3a5c;font-family:'DM Mono',monospace">3</td>
+          <td style="color:#64748b;font-family:'DM Mono',monospace;font-size:11px">3</td>
           <td>
-            <div style="font-weight:700;font-size:15px;color:#1e2a38">CBA</div>
-            <div style="font-size:11px;color:#90b8d4;margin-top:2px"><span class="sig-chip">Above SMA50</span> · <span class="sig-chip">RSI 48 — momentum zone</span> · <span class="sig-chip">Pullback to SMA20 (-0.1%) — entry zone</span></div>
+            <span style="font-weight:600;color:#e2e8f0">RIO</span>
+            <span style="font-size:10px;color:#475569;margin-left:6px">Resources</span>
           </td>
-          <td style="font-family:'DM Mono',monospace;font-weight:600">$172.80</td>
-          <td class="pos" style="font-family:'DM Mono',monospace">▲ 0.5%</td>
-          <td style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">Financials</td>
-          <td><span class="badge badge-mid">Pullback</span></td>
-          <td style="font-family:'DM Mono',monospace;color:var(--green)">48</td>
-          <td class="pos" style="font-family:'DM Mono',monospace">+0.1%</td>
-          <td class="pos" style="font-family:'DM Mono',monospace">+9.0%</td>
-          <td style="font-family:'DM Mono',monospace;color:#90b8d4">0.9×</td>
-          <td>
-            <div style="display:flex;align-items:center;gap:8px">
-              <div style="background:#e8f0f8;border-radius:4px;height:6px;width:80px;overflow:hidden">
-                <div style="background:#1a3a5c;height:6px;width:65%;border-radius:4px"></div>
-              </div>
-              <span style="font-family:'DM Mono',monospace;font-size:11px;color:#90b8d4">68</span>
-            </div>
-          </td>
-          <td style="font-size:11px;font-family:'DM Mono',monospace">
-            <span style="color:var(--red)">Stop $167.76</span><br>
-            <span style="color:var(--green)">T1 $182.88</span>
-          </td>
+          <td style="font-family:'DM Mono',monospace;color:#e2e8f0">$161.62</td>
+          <td class="neg-dark" style="font-family:'DM Mono',monospace">▼ 3.3%</td>
+          <td><span class="strat-mini-badge strat-mc">MC</span></td>
+          <td style="font-family:'DM Mono',monospace;color:#22c55e">54</td>
+          <td style="font-family:'DM Mono',monospace;color:#64748b">$130.61 <span style="color:#22c55e;font-size:10px">+23.7%</span></td>
+          <td style="font-family:'DM Mono',monospace;color:#64748b">0.8× <span style="font-size:10px;color:#475569">$259076K/day</span></td>
+          <td style="font-family:'DM Mono',monospace;color:#ef4444">$156.37</td>
+          <td style="font-family:'DM Mono',monospace;color:#22c55e">$177.36</td>
         </tr><tr>
-          <td style="font-weight:700;color:#1a3a5c;font-family:'DM Mono',monospace">4</td>
+          <td style="color:#64748b;font-family:'DM Mono',monospace;font-size:11px">4</td>
           <td>
-            <div style="font-weight:700;font-size:15px;color:#1e2a38">BHP</div>
-            <div style="font-size:11px;color:#90b8d4;margin-top:2px"><span class="sig-chip">Above SMA20</span> · <span class="sig-chip">Above SMA50</span> · <span class="sig-chip">RSI 56 — momentum zone</span></div>
+            <span style="font-weight:600;color:#e2e8f0">WOW</span>
+            <span style="font-size:10px;color:#475569;margin-left:6px">Consumer</span>
           </td>
-          <td style="font-family:'DM Mono',monospace;font-weight:600">$51.23</td>
-          <td class="neg" style="font-family:'DM Mono',monospace">▼ 2.5%</td>
-          <td style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">Resources</td>
-          <td><span class="badge badge-nu">Breakout Watch</span></td>
-          <td style="font-family:'DM Mono',monospace;color:var(--green)">56</td>
-          <td class="neg" style="font-family:'DM Mono',monospace">-7.1%</td>
-          <td class="pos" style="font-family:'DM Mono',monospace">+12.3%</td>
-          <td style="font-family:'DM Mono',monospace;color:#90b8d4">0.7×</td>
-          <td>
-            <div style="display:flex;align-items:center;gap:8px">
-              <div style="background:#e8f0f8;border-radius:4px;height:6px;width:80px;overflow:hidden">
-                <div style="background:#1a3a5c;height:6px;width:55%;border-radius:4px"></div>
-              </div>
-              <span style="font-family:'DM Mono',monospace;font-size:11px;color:#90b8d4">56</span>
-            </div>
-          </td>
-          <td style="font-size:11px;font-family:'DM Mono',monospace">
-            <span style="color:var(--red)">Stop $48.63</span><br>
-            <span style="color:var(--green)">T1 $56.43</span>
-          </td>
-        </tr><tr>
-          <td style="font-weight:700;color:#1a3a5c;font-family:'DM Mono',monospace">5</td>
-          <td>
-            <div style="font-weight:700;font-size:15px;color:#1e2a38">RIO</div>
-            <div style="font-size:11px;color:#90b8d4;margin-top:2px"><span class="sig-chip">Above SMA20</span> · <span class="sig-chip">Above SMA50</span> · <span class="sig-chip">RSI 54 — momentum zone</span></div>
-          </td>
-          <td style="font-family:'DM Mono',monospace;font-weight:600">$161.62</td>
-          <td class="neg" style="font-family:'DM Mono',monospace">▼ 3.3%</td>
-          <td style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">Resources</td>
-          <td><span class="badge badge-nu">Breakout Watch</span></td>
-          <td style="font-family:'DM Mono',monospace;color:var(--green)">54</td>
-          <td class="neg" style="font-family:'DM Mono',monospace">-1.8%</td>
-          <td class="pos" style="font-family:'DM Mono',monospace">+10.5%</td>
-          <td style="font-family:'DM Mono',monospace;color:#90b8d4">0.8×</td>
-          <td>
-            <div style="display:flex;align-items:center;gap:8px">
-              <div style="background:#e8f0f8;border-radius:4px;height:6px;width:80px;overflow:hidden">
-                <div style="background:#1a3a5c;height:6px;width:55%;border-radius:4px"></div>
-              </div>
-              <span style="font-family:'DM Mono',monospace;font-size:11px;color:#90b8d4">56</span>
-            </div>
-          </td>
-          <td style="font-size:11px;font-family:'DM Mono',monospace">
-            <span style="color:var(--red)">Stop $150.00</span><br>
-            <span style="color:var(--green)">T1 $184.86</span>
-          </td>
+          <td style="font-family:'DM Mono',monospace;color:#e2e8f0">$37.01</td>
+          <td class="pos-dark" style="font-family:'DM Mono',monospace">▲ 1.3%</td>
+          <td><span class="strat-mini-badge strat-pb">PB</span></td>
+          <td style="font-family:'DM Mono',monospace;color:#94a3b8">69</td>
+          <td style="font-family:'DM Mono',monospace;color:#64748b">$30.00 <span style="color:#22c55e;font-size:10px">+23.4%</span></td>
+          <td style="font-family:'DM Mono',monospace;color:#64748b">1.1× <span style="font-size:10px;color:#475569">$106867K/day</span></td>
+          <td style="font-family:'DM Mono',monospace;color:#ef4444">$36.35</td>
+          <td style="font-family:'DM Mono',monospace;color:#22c55e">$38.98</td>
         </tr></tbody>
       </table>
     </div>
   </div>
 
-  <!-- Strategy explanation -->
-  <div class="section-title">Swing Strategies Used</div>
-  <div class="strat-grid">
-    <div class="strat-card">
-      <div class="strat-header">
-        <div class="strat-name">Momentum Continuation</div>
-        <span class="badge badge-up">Long</span>
+  <!-- ── POSITION SIZING ── -->
+  <div class="hc-section" style="margin-bottom:24px">
+    <div class="hc-header">
+      <div>
+        <div class="hc-title">Position Sizing — $10K Portfolio</div>
+        <div class="hc-sub">$3,333 per trade · Max 3 concurrent · $3 brokerage · Free Ride at +10%</div>
       </div>
-      <div class="strat-body">Stock is above both SMA20 and SMA50 with RSI in the 40–65 sweet spot. Trend is intact, not yet overbought — good risk/reward window.</div>
-      <div class="strat-rule">Entry: above SMA20 + SMA50, RSI 40–65<br>Exit: closes below SMA20 or RSI &gt;80<br>Hold time: days to weeks</div>
     </div>
-    <div class="strat-card">
-      <div class="strat-header">
-        <div class="strat-name">SMA20 Pullback</div>
-        <span class="badge badge-mid">Pullback</span>
-      </div>
-      <div class="strat-body">Strong stock pulls back to its 20-day average — a classic "buy the dip" in an uptrend. High probability entry as long as the broader trend is intact.</div>
-      <div class="strat-rule">Entry: price within 3% of SMA20, above SMA50<br>Exit: 5%+ above SMA20 or below SMA50<br>Hold time: 3–15 trading days</div>
+    <div style="overflow-x:auto">
+      <table class="hc-table">
+        <thead><tr>
+          <th>Stock</th><th>Capital</th><th>Shares</th><th>Cost</th>
+          <th>Max Loss (incl. $3 brok)</th><th>Free Ride Trigger (+10%)</th><th>Target (3R)</th>
+        </tr></thead>
+        <tbody><tr>
+          <td style="font-weight:600;color:#e2e8f0">WHC</td>
+          <td style="font-family:'DM Mono',monospace;color:#94a3b8">$3,333</td>
+          <td style="font-family:'DM Mono',monospace;color:#e2e8f0">367</td>
+          <td style="font-family:'DM Mono',monospace;color:#e2e8f0">$3,332.36</td>
+          <td style="font-family:'DM Mono',monospace;color:#ef4444">−$14.38</td>
+          <td style="font-family:'DM Mono',monospace;color:#f59e0b">$9.99</td>
+          <td style="font-family:'DM Mono',monospace;color:#22c55e">$9.17 (3.0:1)</td>
+        </tr><tr>
+          <td style="font-weight:600;color:#e2e8f0">BHP</td>
+          <td style="font-family:'DM Mono',monospace;color:#94a3b8">$3,333</td>
+          <td style="font-family:'DM Mono',monospace;color:#e2e8f0">65</td>
+          <td style="font-family:'DM Mono',monospace;color:#e2e8f0">$3,329.95</td>
+          <td style="font-family:'DM Mono',monospace;color:#ef4444">−$74.27</td>
+          <td style="font-family:'DM Mono',monospace;color:#f59e0b">$56.35</td>
+          <td style="font-family:'DM Mono',monospace;color:#22c55e">$54.52 (3.0:1)</td>
+        </tr><tr>
+          <td style="font-weight:600;color:#e2e8f0">RIO</td>
+          <td style="font-family:'DM Mono',monospace;color:#94a3b8">$3,333</td>
+          <td style="font-family:'DM Mono',monospace;color:#e2e8f0">20</td>
+          <td style="font-family:'DM Mono',monospace;color:#e2e8f0">$3,232.40</td>
+          <td style="font-family:'DM Mono',monospace;color:#ef4444">−$107.93</td>
+          <td style="font-family:'DM Mono',monospace;color:#f59e0b">$177.78</td>
+          <td style="font-family:'DM Mono',monospace;color:#22c55e">$177.36 (3.0:1)</td>
+        </tr><tr>
+          <td style="font-weight:600;color:#e2e8f0">WOW</td>
+          <td style="font-family:'DM Mono',monospace;color:#94a3b8">$3,333</td>
+          <td style="font-family:'DM Mono',monospace;color:#e2e8f0">90</td>
+          <td style="font-family:'DM Mono',monospace;color:#e2e8f0">$3,330.90</td>
+          <td style="font-family:'DM Mono',monospace;color:#ef4444">−$62.21</td>
+          <td style="font-family:'DM Mono',monospace;color:#f59e0b">$40.71</td>
+          <td style="font-family:'DM Mono',monospace;color:#22c55e">$38.98 (3.0:1)</td>
+        </tr></tbody>
+      </table>
     </div>
-    <div class="strat-card">
-      <div class="strat-header">
-        <div class="strat-name">Volume Breakout</div>
-        <span class="badge badge-up">Long</span>
-      </div>
-      <div class="strat-body">Price breaks above a recent range on volume 1.3× or higher than average. Volume confirms the move — low-volume breakouts often fail.</div>
-      <div class="strat-rule">Entry: new high + volume &gt;1.3× avg<br>Exit: close back below breakout level<br>Hold time: days to months</div>
-    </div>
-    <div class="strat-card">
-      <div class="strat-header">
-        <div class="strat-name">Oversold Bounce</div>
-        <span class="badge badge-bounce">Contrarian</span>
-      </div>
-      <div class="strat-body">Stock has dropped hard (RSI &lt;35) but remains in a longer uptrend (above SMA50). Short-term mean reversion play — snap-back to SMA20.</div>
-      <div class="strat-rule">Entry: RSI &lt;35 + above SMA50<br>Exit: RSI reaches 55 or hits SMA20<br>Hold time: 2–10 days</div>
-    </div>
-    <div class="strat-card">
-      <div class="strat-header">
-        <div class="strat-name">Bollinger Band Squeeze</div>
-        <span class="badge badge-nu">Breakout Watch</span>
-      </div>
-      <div class="strat-body">Volatility compresses (bands narrow). A breakout from this low-volatility period is often explosive. Wait for price to close outside the band with volume.</div>
-      <div class="strat-rule">Entry: price closes above upper BB + volume spike<br>Exit: close back inside BB<br>Hold time: 5–20 trading days</div>
-    </div>
-    <div class="strat-card">
-      <div class="strat-header">
-        <div class="strat-name">3-Month Momentum Rank</div>
-        <span class="badge badge-up">Long</span>
-      </div>
-      <div class="strat-body">Stocks with the strongest 3-month return tend to keep outperforming over the next 1–3 months. This is the core of systematic momentum investing.</div>
-      <div class="strat-rule">Entry: top 10% by 3-month return, above SMA20<br>Exit: drops out of top 20% or below SMA20<br>Hold time: weeks to months</div>
+    <div style="margin-top:16px;padding:14px 18px;background:#112233;border:1px solid #1a3a5c;border-radius:8px;font-size:12px;color:#64748b;line-height:1.9;font-family:'DM Mono',monospace">
+      ⚠️ Not financial advice. Paper trade on nabtrade virtual portfolio first. Stake/CMC recommended for $3 flat brokerage when ready for live trading.
     </div>
   </div>
 
-  <!-- Position size helper -->
-  <div class="section-title">Position Size Guide</div>
-  <div class="info-box">Based on $500 to $10,000 capital. Max risk per trade = 3% below SMA20 (stop loss). Adjust shares to your comfort level.</div>
-  <div class="card">
-    <div style="overflow-x:auto">
-      <table class="data-table">
-        <thead><tr><th>Stock</th><th>Capital</th><th>Approx Shares</th><th>Max Loss at Stop</th></tr></thead>
-        <tbody><tr>
-              <td style="font-weight:600">TNE</td>
-              <td>$500</td>
-              <td style="font-family:'DM Mono',monospace">18</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$16</td>
-            </tr><tr>
-              <td style="font-weight:600">TNE</td>
-              <td>$2,500</td>
-              <td style="font-family:'DM Mono',monospace">92</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$84</td>
-            </tr><tr>
-              <td style="font-weight:600">TNE</td>
-              <td>$5,000</td>
-              <td style="font-family:'DM Mono',monospace">185</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$168</td>
-            </tr><tr>
-              <td style="font-weight:600">TNE</td>
-              <td>$10,000</td>
-              <td style="font-family:'DM Mono',monospace">371</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$338</td>
-            </tr><tr>
-              <td style="font-weight:600">WHC</td>
-              <td>$500</td>
-              <td style="font-family:'DM Mono',monospace">55</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$17</td>
-            </tr><tr>
-              <td style="font-weight:600">WHC</td>
-              <td>$2,500</td>
-              <td style="font-family:'DM Mono',monospace">275</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$83</td>
-            </tr><tr>
-              <td style="font-weight:600">WHC</td>
-              <td>$5,000</td>
-              <td style="font-family:'DM Mono',monospace">550</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$165</td>
-            </tr><tr>
-              <td style="font-weight:600">WHC</td>
-              <td>$10,000</td>
-              <td style="font-family:'DM Mono',monospace">1101</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$330</td>
-            </tr><tr>
-              <td style="font-weight:600">CBA</td>
-              <td>$500</td>
-              <td style="font-family:'DM Mono',monospace">2</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$10</td>
-            </tr><tr>
-              <td style="font-weight:600">CBA</td>
-              <td>$2,500</td>
-              <td style="font-family:'DM Mono',monospace">14</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$71</td>
-            </tr><tr>
-              <td style="font-weight:600">CBA</td>
-              <td>$5,000</td>
-              <td style="font-family:'DM Mono',monospace">28</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$141</td>
-            </tr><tr>
-              <td style="font-weight:600">CBA</td>
-              <td>$10,000</td>
-              <td style="font-family:'DM Mono',monospace">57</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$287</td>
-            </tr><tr>
-              <td style="font-weight:600">BHP</td>
-              <td>$500</td>
-              <td style="font-family:'DM Mono',monospace">9</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$23</td>
-            </tr><tr>
-              <td style="font-weight:600">BHP</td>
-              <td>$2,500</td>
-              <td style="font-family:'DM Mono',monospace">48</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$125</td>
-            </tr><tr>
-              <td style="font-weight:600">BHP</td>
-              <td>$5,000</td>
-              <td style="font-family:'DM Mono',monospace">97</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$252</td>
-            </tr><tr>
-              <td style="font-weight:600">BHP</td>
-              <td>$10,000</td>
-              <td style="font-family:'DM Mono',monospace">195</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$507</td>
-            </tr><tr>
-              <td style="font-weight:600">RIO</td>
-              <td>$500</td>
-              <td style="font-family:'DM Mono',monospace">3</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$35</td>
-            </tr><tr>
-              <td style="font-weight:600">RIO</td>
-              <td>$2,500</td>
-              <td style="font-family:'DM Mono',monospace">15</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$174</td>
-            </tr><tr>
-              <td style="font-weight:600">RIO</td>
-              <td>$5,000</td>
-              <td style="font-family:'DM Mono',monospace">30</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$349</td>
-            </tr><tr>
-              <td style="font-weight:600">RIO</td>
-              <td>$10,000</td>
-              <td style="font-family:'DM Mono',monospace">61</td>
-              <td style="font-family:'DM Mono',monospace;color:#b91c1c">-$709</td>
-            </tr></tbody>
-      </table>
-    </div>
-  </div>
 </div>
 
 <!-- ══════════ BACKTEST ══════════ -->
@@ -1464,6 +1414,74 @@ function renderTrades() {
       <td><button class="btn-del" onclick="deleteTrade(${tid})" title="Delete">🗑</button></td>
     </tr>`;
   }).join('');
+}
+
+// ─── ASX Swing Catalyst Portfolio Tracker ────────────────────────
+let scPositions = JSON.parse(localStorage.getItem('jyts_sc_positions') || '[]');
+renderSCPortfolio();
+
+function addPosition() {
+  const ticker  = (document.getElementById('sc-ticker').value || '').toUpperCase().trim();
+  const entry   = parseFloat(document.getElementById('sc-entry').value);
+  const shares  = parseInt(document.getElementById('sc-shares').value);
+  const current = parseFloat(document.getElementById('sc-current').value);
+  const stop    = parseFloat(document.getElementById('sc-stop-input').value);
+  if (!ticker || !entry || !shares || !current) { alert('Fill in Ticker, Entry, Shares and Current price.'); return; }
+  scPositions.push({ id: Date.now(), ticker, entry, shares, current, stop: stop||0, added: new Date().toISOString().split('T')[0] });
+  localStorage.setItem('jyts_sc_positions', JSON.stringify(scPositions));
+  renderSCPortfolio();
+  ['sc-ticker','sc-entry','sc-shares','sc-current','sc-stop-input'].forEach(id => document.getElementById(id).value = '');
+}
+
+function removeSCPosition(id) {
+  scPositions = scPositions.filter(p => p.id !== id);
+  localStorage.setItem('jyts_sc_positions', JSON.stringify(scPositions));
+  renderSCPortfolio();
+}
+
+function renderSCPortfolio() {
+  const tbody = document.getElementById('sc-tbody');
+  if (!scPositions.length) {
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:24px;color:#475569;font-family:'DM Mono',monospace;font-size:12px">No active positions. Add one above.</td></tr>';
+    document.getElementById('sc-total').textContent = '$10,000';
+    document.getElementById('sc-pnl').textContent = '+$0';
+    document.getElementById('sc-pnl').style.color = '#22c55e';
+    document.getElementById('sc-positions').textContent = '0 / 3';
+    document.getElementById('sc-brokerage').textContent = '$' + (scPositions.length * 3).toFixed(2);
+    return;
+  }
+  let totalPnL = 0, totalCost = 0, totalValue = 0;
+  const rows = scPositions.map(p => {
+    const cost    = p.entry * p.shares;
+    const value   = p.current * p.shares;
+    const pnl     = value - cost;
+    const pnlPct  = (pnl / cost) * 100;
+    totalPnL  += pnl; totalCost += cost; totalValue += value;
+    const pnlCol  = pnl >= 0 ? '#22c55e' : '#ef4444';
+    const freeRide = pnlPct >= 10;
+    const stopPct = p.stop > 0 ? ((p.current - p.stop) / p.current * 100).toFixed(1) : '—';
+    return `<tr>
+      <td style="font-weight:700;color:#e2e8f0">${p.ticker}</td>
+      <td style="font-family:'DM Mono',monospace;color:#94a3b8">$${p.entry.toFixed(2)}</td>
+      <td style="font-family:'DM Mono',monospace;color:#e2e8f0">$${p.current.toFixed(2)}</td>
+      <td style="font-family:'DM Mono',monospace">${p.shares}</td>
+      <td style="font-family:'DM Mono',monospace;color:#94a3b8">$${cost.toLocaleString('en-AU',{maximumFractionDigits:0})}</td>
+      <td style="font-family:'DM Mono',monospace;color:#e2e8f0">$${value.toLocaleString('en-AU',{maximumFractionDigits:0})}</td>
+      <td style="font-family:'DM Mono',monospace;color:${pnlCol}">${pnl>=0?'+':''}$${Math.abs(pnl).toFixed(2)}</td>
+      <td style="font-family:'DM Mono',monospace;color:${pnlCol}">${pnl>=0?'+':''}${pnlPct.toFixed(1)}%</td>
+      <td style="font-family:'DM Mono',monospace;color:#ef4444">${p.stop>0?'$'+p.stop.toFixed(2):'—'}</td>
+      <td style="font-size:11px">${freeRide?'<span style="color:#22c55e;font-weight:600">✓ Move stop to entry</span>':'<span style="color:#475569">'+pnlPct.toFixed(1)+'% of 10%</span>'}</td>
+      <td><button class="btn-dark-del" onclick="removeSCPosition(${p.id})">✕</button></td>
+    </tr>`;
+  });
+  tbody.innerHTML = rows.join('');
+  const totalPort = 10000 - totalCost + totalValue;
+  const pnlEl = document.getElementById('sc-pnl');
+  pnlEl.textContent = (totalPnL >= 0 ? '+$' : '-$') + Math.abs(totalPnL).toFixed(2);
+  pnlEl.style.color = totalPnL >= 0 ? '#22c55e' : '#ef4444';
+  document.getElementById('sc-total').textContent = '$' + totalPort.toLocaleString('en-AU',{maximumFractionDigits:0});
+  document.getElementById('sc-positions').textContent = scPositions.length + ' / 3';
+  document.getElementById('sc-brokerage').textContent = '$' + (scPositions.length * 3).toFixed(2);
 }
 </script>
 </body>
