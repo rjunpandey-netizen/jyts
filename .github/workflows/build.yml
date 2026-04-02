@@ -1,0 +1,38 @@
+name: Build Jun Yadnap Trade System
+
+on:
+  schedule:
+    - cron: '15 5 * * 1-5'
+    - cron: '15 6 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install yfinance pandas numpy
+
+      - name: Run build script
+        run: |
+          python scripts/build.py
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: gh-pages
+          commit_message: "Auto-update: ${{ github.run_id }}"
