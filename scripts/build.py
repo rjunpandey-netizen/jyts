@@ -1818,7 +1818,7 @@ def main():
     regime = get_regime(price, s250, r)
     signal = get_signal(regime, price, s20, s250, bbu, bbl, r)
 
-    signal_data = {{
+    signal_data = {
         **signal,
         "regime": regime,
         "price": price,
@@ -1828,9 +1828,9 @@ def main():
         "sma250": s250,
         "ext20": (price - s20) / s20 * 100,
         "ext250": (price - s250) / s250 * 100,
-    }}
+    }
 
-    print(f"  Regime: {{regime}} | Signal: {{signal['action']}}")
+    print(f"  Regime: {regime} | Signal: {{signal['action']}}")
 
     chart_data = build_chart_data(df, gear_df, bboz_df)
     backtest_data = run_backtest(df)
