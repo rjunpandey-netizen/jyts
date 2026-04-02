@@ -806,7 +806,7 @@ function renderTrades() {{
     }}
   }});
 
-  const portfolioVal = 100000 + realisedPnL + openValue;
+  const portfolioVal = 100000 + realisedPnL;
   const ret = realisedPnL / 100000 * 100;
 
   document.getElementById('pt-portfolio').textContent = '$' + portfolioVal.toLocaleString('en-AU', {{ maximumFractionDigits: 0 }});
