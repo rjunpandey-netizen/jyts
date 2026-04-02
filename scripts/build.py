@@ -338,7 +338,7 @@ def generate_html(signal_data, chart_data, backtest_data, build_time, tz_name):
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jun Yadnap Trade System</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 *{{box-sizing:border-box;margin:0;padding:0}}
@@ -354,7 +354,7 @@ def generate_html(signal_data, chart_data, backtest_data, build_time, tz_name):
   --shadow:0 1px 3px rgba(0,0,0,0.07),0 1px 2px rgba(0,0,0,0.04);
   --shadow-md:0 4px 12px rgba(0,0,0,0.08);
 }}
-body{{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh}}
+body{{background:var(--bg);color:var(--text);font-family:'Geist',sans-serif;font-size:14px;min-height:100vh}}
 
 /* Lock */
 #lock-screen{{position:fixed;inset:0;background:#0f172a;z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:28px}}
@@ -363,7 +363,7 @@ body{{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fo
 .lock-logo em{{color:#93c5fd;font-style:italic}}
 .lock-sub{{font-size:10px;color:#475569;font-family:'DM Mono',monospace;letter-spacing:2px;text-transform:uppercase}}
 .lock-form{{display:flex;flex-direction:column;gap:12px;width:300px}}
-.lock-input{{background:#1e293b;border:1px solid #334155;border-radius:var(--radius-sm);padding:13px 16px;color:#f1f5f9;font-size:14px;outline:none;transition:border-color .15s;font-family:'DM Sans',sans-serif}}
+.lock-input{{background:#1e293b;border:1px solid #334155;border-radius:var(--radius-sm);padding:13px 16px;color:#f1f5f9;font-size:14px;outline:none;transition:border-color .15s;font-family:'Geist',sans-serif}}
 .lock-input:focus{{border-color:#93c5fd}}
 .lock-btn{{background:#2563eb;color:#fff;border:none;padding:13px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;transition:background .15s}}
 .lock-btn:hover{{background:#1d4ed8}}
@@ -467,7 +467,7 @@ body{{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fo
 .form-grid{{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}}
 .form-group{{display:flex;flex-direction:column;gap:6px}}
 .form-label{{font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;font-weight:500}}
-.form-input,.form-select{{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 13px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;width:100%;outline:none;transition:border-color .15s}}
+.form-input,.form-select{{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 13px;color:var(--text);font-size:13px;font-family:'Geist',sans-serif;width:100%;outline:none;transition:border-color .15s}}
 .form-input:focus,.form-select:focus{{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}}
 .btn-primary{{background:#0f172a;color:#fff;border:none;padding:11px 22px;border-radius:var(--radius-sm);font-size:13px;cursor:pointer;font-weight:600;transition:background .15s}}
 .btn-primary:hover{{background:#1e293b}}
