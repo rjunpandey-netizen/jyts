@@ -1830,11 +1830,11 @@ def main():
         "ext250": (price - s250) / s250 * 100,
     }
 
-    print(f"  Regime: {regime} | Signal: {{signal['action']}}")
+    print('  Regime: ' + regime + ' | Signal: ' + signal['action'])
 
     chart_data = build_chart_data(df, gear_df, bboz_df)
     backtest_data = run_backtest(df)
-    print(f"  Backtest: Return={{backtest_data['total_return']:+.1f}}% | MaxDD={{backtest_data['max_dd']:.1f}}% | WinRate={{backtest_data['win_rate']:.0f}}%")
+    print('  Backtest: Return=' + str(round(backtest_data["total_return"],1)) + '% | MaxDD=' + str(round(backtest_data["max_dd"],1)) + '% | WinRate=' + str(round(backtest_data["win_rate"],0)) + '%')
 
     research_10, high_conviction_4 = fetch_top_stocks()
 
@@ -1845,7 +1845,7 @@ def main():
     out_path = "docs/index.html"
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(html)
-    print(f"  Dashboard written to {{out_path}}")
+    print(f"  Dashboard written to {out_path}")
     print("=== Build complete ===")
 
 if __name__ == "__main__":
