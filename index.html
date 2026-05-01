@@ -244,7 +244,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   <div class="lock-sub">ASX Systematic Trading</div>
   <div class="lock-tip">
     <div class="lock-tip-title">Today's Trading Reminder</div>
-    <div class="lock-tip-body"><strong>What is SMA250?</strong><br>SMA250 is the 250-day average price of the ASX 200. Think of it as the market long-term mood. When the ASX is above it, markets are healthy (GEAR). Below it, markets are weak (BBOZ).</div>
+    <div class="lock-tip-body"><strong>What is RSI?</strong><br>RSI (Relative Strength Index) measures how fast prices are moving. Above 70 = overbought. Below 30 = oversold. Between 40-60 = normal momentum.</div>
   </div>
   <div class="lock-form">
     <input class="lock-input" type="password" id="lock-pw" placeholder="Enter password" onkeydown="if(event.key==='Enter')unlock()">
@@ -276,7 +276,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
     <div class="nav-item" onclick="showTab('guide',this)"><span class="nav-icon">&#9675;</span> How to Use</div>
   </div>
   <div class="sb-footer">
-    Built: 30 Apr 2026 09:55 PM AEST<br>
+    Built: 01 May 2026 08:12 PM AEST<br>
     Auto-updates 4:15pm daily<br><br>
     Not financial advice.<br>
     Paper trading only.
@@ -291,20 +291,20 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   <div class="page-header">
     <div>
       <div class="page-title">Dashboard</div>
-      <div class="page-sub">Updated 30 Apr 2026 09:55 PM AEST</div>
+      <div class="page-sub">Updated 01 May 2026 08:12 PM AEST</div>
     </div>
     <div class="build-badge">Auto-updates 4:15pm AEST/AEDT</div>
   </div>
 
   <div class="tip-box">
-    <strong>What is SMA250?</strong>
-    SMA250 is the 250-day average price of the ASX 200. Think of it as the market long-term mood. When the ASX is above it, markets are healthy (GEAR). Below it, markets are weak (BBOZ).
+    <strong>What is RSI?</strong>
+    RSI (Relative Strength Index) measures how fast prices are moving. Above 70 = overbought. Below 30 = oversold. Between 40-60 = normal momentum.
   </div>
 
   <div class="signal-card">
     <div class="signal-regime-tag">&#9679; DOWNTREND</div>
     <div class="signal-action">BUY <span style="color:#b91c1c;font-weight:700">BBOZ</span></div>
-    <div class="signal-reason">Downtrend. ASX -0.8% below SMA250. Holding BBOZ.</div>
+    <div class="signal-reason">Downtrend. ASX -0.1% below SMA250. Holding BBOZ.</div>
     <div class="alloc-row">
       <div class="alloc-chip"><div class="alloc-chip-name">GEAR &mdash; Long</div><div class="alloc-chip-val av-gear">0%</div></div>
       <div class="alloc-chip"><div class="alloc-chip-name">BBOZ &mdash; Short</div><div class="alloc-chip-val av-bboz">25%</div></div>
@@ -315,34 +315,34 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   <div class="metrics-row m4">
     <div class="metric-card">
       <div class="metric-label">ASX 200</div>
-      <div class="metric-val">8,666</div>
-      <div class="metric-sub" style="color:var(--red)">-0.24% today</div>
+      <div class="metric-val">8,730</div>
+      <div class="metric-sub" style="color:var(--green)">+0.74% today</div>
     </div>
     <div class="metric-card">
       <div class="metric-label">RSI (14)</div>
-      <div class="metric-val neg">14.3</div>
+      <div class="metric-val neg">27.8</div>
       <div class="metric-sub">Oversold</div>
     </div>
     <div class="metric-card">
       <div class="metric-label">vs SMA 250</div>
-      <div class="metric-val neg">-0.8%</div>
-      <div class="metric-sub">SMA250: 8,736</div>
+      <div class="metric-val neg">-0.1%</div>
+      <div class="metric-sub">SMA250: 8,739</div>
     </div>
     <div class="metric-card">
       <div class="metric-label">vs SMA 20</div>
-      <div class="metric-val neg">-2.0%</div>
-      <div class="metric-sub">SMA20: 8,840</div>
+      <div class="metric-val neg">-1.3%</div>
+      <div class="metric-sub">SMA20: 8,843</div>
     </div>
   </div>
 
   <div style="margin-bottom:20px">
     <div class="etf-price-badge">
       <div class="etf-price-label">GEAR.AX Last Close</div>
-      <div class="etf-price-val">$34.58</div>
+      <div class="etf-price-val">$35.19</div>
     </div>
     <div class="etf-price-badge">
       <div class="etf-price-label">BBOZ.AX Last Close</div>
-      <div class="etf-price-val">$22.35</div>
+      <div class="etf-price-val">$22.0</div>
     </div>
   </div>
 
@@ -407,11 +407,11 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <div class="etf-price-badge" style="cursor:pointer" onclick="prefillPrice('GEAR',GEAR_PRICE)">
             <div class="etf-price-label">GEAR.AX &darr; click to prefill</div>
-            <div class="etf-price-val">$34.58</div>
+            <div class="etf-price-val">$35.19</div>
           </div>
           <div class="etf-price-badge" style="cursor:pointer" onclick="prefillPrice('BBOZ',BBOZ_PRICE)">
             <div class="etf-price-label">BBOZ.AX &darr; click to prefill</div>
-            <div class="etf-price-val">$22.35</div>
+            <div class="etf-price-val">$22.0</div>
           </div>
         </div>
       </div>
@@ -487,27 +487,27 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
       <div class="pulse-scroll">
         <span class="pulse-item">
           <span class="pulse-ticker">WDS.ASX</span>
-          <span class="pulse-price" style="color:#22c55e">&#9650; $33.55 (+1.5%)</span>
+          <span class="pulse-price" style="color:#ef4444">&#9660; $33.12 (-1.3%)</span>
           <span class="pulse-badge" style="background:#3b82f6">MC</span>
         </span><span class="pulse-item">
-          <span class="pulse-ticker">STO.ASX</span>
-          <span class="pulse-price" style="color:#22c55e">&#9650; $8.00 (+3.0%)</span>
+          <span class="pulse-ticker">RIO.ASX</span>
+          <span class="pulse-price" style="color:#22c55e">&#9650; $171.97 (+2.7%)</span>
           <span class="pulse-badge" style="background:#3b82f6">MC</span>
         </span><span class="pulse-item">
-          <span class="pulse-ticker">MQG.ASX</span>
-          <span class="pulse-price" style="color:#22c55e">&#9650; $235.08 (+0.8%)</span>
+          <span class="pulse-ticker">WHC.ASX</span>
+          <span class="pulse-price" style="color:#22c55e">&#9650; $8.63 (+2.6%)</span>
           <span class="pulse-badge" style="background:#3b82f6">MC</span>
         </span><span class="pulse-item">
           <span class="pulse-ticker">WDS.ASX</span>
-          <span class="pulse-price" style="color:#22c55e">&#9650; $33.55 (+1.5%)</span>
+          <span class="pulse-price" style="color:#ef4444">&#9660; $33.12 (-1.3%)</span>
           <span class="pulse-badge" style="background:#3b82f6">MC</span>
         </span><span class="pulse-item">
-          <span class="pulse-ticker">STO.ASX</span>
-          <span class="pulse-price" style="color:#22c55e">&#9650; $8.00 (+3.0%)</span>
+          <span class="pulse-ticker">RIO.ASX</span>
+          <span class="pulse-price" style="color:#22c55e">&#9650; $171.97 (+2.7%)</span>
           <span class="pulse-badge" style="background:#3b82f6">MC</span>
         </span><span class="pulse-item">
-          <span class="pulse-ticker">MQG.ASX</span>
-          <span class="pulse-price" style="color:#22c55e">&#9650; $235.08 (+0.8%)</span>
+          <span class="pulse-ticker">WHC.ASX</span>
+          <span class="pulse-price" style="color:#22c55e">&#9650; $8.63 (+2.6%)</span>
           <span class="pulse-badge" style="background:#3b82f6">MC</span>
         </span>
       </div>
@@ -524,7 +524,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
     <div class="hc-header">
       <div>
         <div class="hc-title">High Conviction Setups</div>
-        <div class="hc-sub">Top 4 &middot; 1:3 R/R enforced &middot; Above SMA200 &middot; $500K+ liquidity &middot; Updated 30 Apr 2026 09:55 PM AEST</div>
+        <div class="hc-sub">Top 4 &middot; 1:3 R/R enforced &middot; Above SMA200 &middot; $500K+ liquidity &middot; Updated 01 May 2026 08:12 PM AEST</div>
       </div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <div class="hc-stat-pill"><span class="hc-stat-label">Capital</span><span class="hc-stat-val">$10,000</span></div>
@@ -547,55 +547,55 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
               Momentum +1
             </span>
           </td>
-          <td style="font-weight:600;color:#e2e8f0">$33.55</td>
-          <td style="color:#ef4444">$33.03
-            <div style="font-size:10px;color:#6b7280">-1.6% ATR $0.96</div>
+          <td style="font-weight:600;color:#e2e8f0">$33.12</td>
+          <td style="color:#ef4444">$32.93
+            <div style="font-size:10px;color:#6b7280">-0.6% ATR $0.89</div>
           </td>
-          <td style="color:#22c55e">$35.11
+          <td style="color:#22c55e">$33.69
             <div style="font-size:10px;color:#6b7280">R/R 3.0:1</div>
           </td>
           <td style="font-size:11px;color:#94a3b8;max-width:160px">RSI > 80 or close below SMA20</td>
-          <td style="font-size:11px;color:#94a3b8;max-width:180px">2 strategies confluent - RSI 52 momentum sweet spot - Vol 1.3x avg</td>
+          <td style="font-size:11px;color:#94a3b8;max-width:180px">2 strategies confluent - RSI 43 momentum sweet spot - Tight SMA20 touch</td>
         </tr><tr>
           <td>
-            <div style="font-weight:700;font-size:15px;color:#e2e8f0">STO.ASX</div>
+            <div style="font-weight:700;font-size:15px;color:#e2e8f0">RIO.ASX</div>
+            <div style="font-size:10px;color:#90b8d4;margin-top:2px">Resources</div>
+          </td>
+          <td>
+            <span style="display:inline-block;background:#eff6ff;color:#3b82f6;border:1px solid #3b82f6;
+              border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;">
+              Momentum +1
+            </span>
+          </td>
+          <td style="font-weight:600;color:#e2e8f0">$171.97</td>
+          <td style="color:#ef4444">$171.47
+            <div style="font-size:10px;color:#6b7280">-0.3% ATR $3.51</div>
+          </td>
+          <td style="color:#22c55e">$173.48
+            <div style="font-size:10px;color:#6b7280">R/R 3.0:1</div>
+          </td>
+          <td style="font-size:11px;color:#94a3b8;max-width:160px">RSI > 80 or close below SMA20</td>
+          <td style="font-size:11px;color:#94a3b8;max-width:180px">2 strategies confluent - RSI 50 momentum sweet spot - Tight SMA20 touch</td>
+        </tr><tr>
+          <td>
+            <div style="font-weight:700;font-size:15px;color:#e2e8f0">WHC.ASX</div>
             <div style="font-size:10px;color:#90b8d4;margin-top:2px">Energy</div>
           </td>
           <td>
             <span style="display:inline-block;background:#eff6ff;color:#3b82f6;border:1px solid #3b82f6;
               border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;">
-              Momentum +1
+              Momentum
             </span>
           </td>
-          <td style="font-weight:600;color:#e2e8f0">$8.00</td>
-          <td style="color:#ef4444">$7.80
-            <div style="font-size:10px;color:#6b7280">-2.5% ATR $0.20</div>
+          <td style="font-weight:600;color:#e2e8f0">$8.63</td>
+          <td style="color:#ef4444">$8.30
+            <div style="font-size:10px;color:#6b7280">-3.9% ATR $0.33</div>
           </td>
-          <td style="color:#22c55e">$8.59
+          <td style="color:#22c55e">$9.63
             <div style="font-size:10px;color:#6b7280">R/R 3.0:1</div>
           </td>
           <td style="font-size:11px;color:#94a3b8;max-width:160px">RSI > 80 or close below SMA20</td>
-          <td style="font-size:11px;color:#94a3b8;max-width:180px">2 strategies confluent - RSI 53 momentum sweet spot - Vol 1.4x avg</td>
-        </tr><tr>
-          <td>
-            <div style="font-weight:700;font-size:15px;color:#e2e8f0">MQG.ASX</div>
-            <div style="font-size:10px;color:#90b8d4;margin-top:2px">Financials</div>
-          </td>
-          <td>
-            <span style="display:inline-block;background:#eff6ff;color:#3b82f6;border:1px solid #3b82f6;
-              border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;">
-              Momentum +1
-            </span>
-          </td>
-          <td style="font-weight:600;color:#e2e8f0">$235.08</td>
-          <td style="color:#ef4444">$230.23
-            <div style="font-size:10px;color:#6b7280">-2.1% ATR $4.85</div>
-          </td>
-          <td style="color:#22c55e">$249.62
-            <div style="font-size:10px;color:#6b7280">R/R 3.0:1</div>
-          </td>
-          <td style="font-size:11px;color:#94a3b8;max-width:160px">RSI > 80 or close below SMA20</td>
-          <td style="font-size:11px;color:#94a3b8;max-width:180px">2 strategies confluent - RSI 64 momentum sweet spot</td>
+          <td style="font-size:11px;color:#94a3b8;max-width:180px">RSI 56 momentum sweet spot</td>
         </tr></tbody>
       </table>
     </div>
@@ -660,42 +660,42 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
             <span style="font-weight:600;color:#e2e8f0">WDS</span>
             <span style="font-size:10px;color:#475569;margin-left:6px">Energy</span>
           </td>
-          <td style="color:#e2e8f0">$33.55</td>
-          <td class="pos-dark">&#9650; 1.5%</td>
+          <td style="color:#e2e8f0">$33.12</td>
+          <td class="neg-dark">&#9660; 1.3%</td>
           <td><span class="strat-mini-badge strat-mc">MC</span> <span class="strat-mini-badge strat-pb">PB</span></td>
-          <td style="color:#22c55e">52</td>
-          <td style="color:#64748b">$25.88 <span style="color:#22c55e;font-size:10px">+29.6%</span></td>
-          <td style="color:#64748b">1.3x <span style="font-size:10px;color:#475569">$246363K/day</span></td>
-          <td style="color:#ef4444">$33.03</td>
-          <td style="color:#22c55e">$35.11</td>
+          <td style="color:#22c55e">43</td>
+          <td style="color:#64748b">$25.94 <span style="color:#22c55e;font-size:10px">+27.7%</span></td>
+          <td style="color:#64748b">0.7x <span style="font-size:10px;color:#475569">$234008K/day</span></td>
+          <td style="color:#ef4444">$32.93</td>
+          <td style="color:#22c55e">$33.69</td>
         </tr><tr>
           <td style="color:#64748b;font-size:11px">2</td>
           <td>
-            <span style="font-weight:600;color:#e2e8f0">STO</span>
-            <span style="font-size:10px;color:#475569;margin-left:6px">Energy</span>
+            <span style="font-weight:600;color:#e2e8f0">RIO</span>
+            <span style="font-size:10px;color:#475569;margin-left:6px">Resources</span>
           </td>
-          <td style="color:#e2e8f0">$8.00</td>
-          <td class="pos-dark">&#9650; 3.0%</td>
+          <td style="color:#e2e8f0">$171.97</td>
+          <td class="pos-dark">&#9650; 2.7%</td>
           <td><span class="strat-mini-badge strat-mc">MC</span> <span class="strat-mini-badge strat-pb">PB</span></td>
-          <td style="color:#22c55e">53</td>
-          <td style="color:#64748b">$6.91 <span style="color:#22c55e;font-size:10px">+15.8%</span></td>
-          <td style="color:#64748b">1.4x <span style="font-size:10px;color:#475569">$119511K/day</span></td>
-          <td style="color:#ef4444">$7.80</td>
-          <td style="color:#22c55e">$8.59</td>
+          <td style="color:#22c55e">50</td>
+          <td style="color:#64748b">$137.06 <span style="color:#22c55e;font-size:10px">+25.5%</span></td>
+          <td style="color:#64748b">0.8x <span style="font-size:10px;color:#475569">$189658K/day</span></td>
+          <td style="color:#ef4444">$171.47</td>
+          <td style="color:#22c55e">$173.48</td>
         </tr><tr>
           <td style="color:#64748b;font-size:11px">3</td>
           <td>
-            <span style="font-weight:600;color:#e2e8f0">MQG</span>
-            <span style="font-size:10px;color:#475569;margin-left:6px">Financials</span>
+            <span style="font-weight:600;color:#e2e8f0">WHC</span>
+            <span style="font-size:10px;color:#475569;margin-left:6px">Energy</span>
           </td>
-          <td style="color:#e2e8f0">$235.08</td>
-          <td class="pos-dark">&#9650; 0.8%</td>
-          <td><span class="strat-mini-badge strat-mc">MC</span> <span class="strat-mini-badge strat-pb">PB</span></td>
-          <td style="color:#22c55e">64</td>
-          <td style="color:#64748b">$211.79 <span style="color:#22c55e;font-size:10px">+11.0%</span></td>
-          <td style="color:#64748b">0.8x <span style="font-size:10px;color:#475569">$196797K/day</span></td>
-          <td style="color:#ef4444">$230.23</td>
-          <td style="color:#22c55e">$249.62</td>
+          <td style="color:#e2e8f0">$8.63</td>
+          <td class="pos-dark">&#9650; 2.6%</td>
+          <td><span class="strat-mini-badge strat-mc">MC</span></td>
+          <td style="color:#22c55e">56</td>
+          <td style="color:#64748b">$7.57 <span style="color:#22c55e;font-size:10px">+14.0%</span></td>
+          <td style="color:#64748b">0.8x <span style="font-size:10px;color:#475569">$48606K/day</span></td>
+          <td style="color:#ef4444">$8.30</td>
+          <td style="color:#22c55e">$9.63</td>
         </tr></tbody>
       </table>
     </div>
@@ -714,27 +714,27 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
         <tbody><tr>
           <td style="font-weight:600;color:#e2e8f0">WDS</td>
           <td style="color:#94a3b8">$3,333</td>
-          <td style="color:#e2e8f0">99</td>
-          <td style="color:#e2e8f0">$3,321.45</td>
-          <td style="color:#ef4444">-$54.58</td>
-          <td style="color:#f59e0b">$36.91</td>
-          <td style="color:#22c55e">$35.11 (3.0:1)</td>
+          <td style="color:#e2e8f0">100</td>
+          <td style="color:#e2e8f0">$3,312.00</td>
+          <td style="color:#ef4444">-$21.95</td>
+          <td style="color:#f59e0b">$36.43</td>
+          <td style="color:#22c55e">$33.69 (3.0:1)</td>
         </tr><tr>
-          <td style="font-weight:600;color:#e2e8f0">STO</td>
+          <td style="font-weight:600;color:#e2e8f0">RIO</td>
           <td style="color:#94a3b8">$3,333</td>
-          <td style="color:#e2e8f0">416</td>
-          <td style="color:#e2e8f0">$3,328.00</td>
-          <td style="color:#ef4444">-$85.01</td>
-          <td style="color:#f59e0b">$8.80</td>
-          <td style="color:#22c55e">$8.59 (3.0:1)</td>
+          <td style="color:#e2e8f0">19</td>
+          <td style="color:#e2e8f0">$3,267.43</td>
+          <td style="color:#ef4444">-$12.54</td>
+          <td style="color:#f59e0b">$189.17</td>
+          <td style="color:#22c55e">$173.48 (3.0:1)</td>
         </tr><tr>
-          <td style="font-weight:600;color:#e2e8f0">MQG</td>
+          <td style="font-weight:600;color:#e2e8f0">WHC</td>
           <td style="color:#94a3b8">$3,333</td>
-          <td style="color:#e2e8f0">14</td>
-          <td style="color:#e2e8f0">$3,291.12</td>
-          <td style="color:#ef4444">-$70.86</td>
-          <td style="color:#f59e0b">$258.59</td>
-          <td style="color:#22c55e">$249.62 (3.0:1)</td>
+          <td style="color:#e2e8f0">386</td>
+          <td style="color:#e2e8f0">$3,331.18</td>
+          <td style="color:#ef4444">-$132.03</td>
+          <td style="color:#f59e0b">$9.49</td>
+          <td style="color:#22c55e">$9.63 (3.0:1)</td>
         </tr></tbody>
       </table>
     </div>
@@ -749,11 +749,11 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   <div class="info-box">Results use real ASX 200 daily closes. GEAR modelled as 2x daily return minus 0.35% MER/year. BBOZ modelled as -2x daily return minus 0.56% MER/year.</div>
 
   <div class="metrics-row m5">
-    <div class="metric-card"><div class="metric-label">Total Return</div><div class="metric-val" style="color:#1a3a5c">+8.7%</div></div>
+    <div class="metric-card"><div class="metric-label">Total Return</div><div class="metric-val" style="color:#1a3a5c">+8.6%</div></div>
     <div class="metric-card"><div class="metric-label">CAGR</div><div class="metric-val" style="color:#1a3a5c">+4.2%</div></div>
-    <div class="metric-card"><div class="metric-label">Max Drawdown</div><div class="metric-val neg">-6.3%</div></div>
-    <div class="metric-card"><div class="metric-label">Win Rate</div><div class="metric-val pos">69%</div></div>
-    <div class="metric-card"><div class="metric-label">Sharpe Ratio</div><div class="metric-val neu">0.54</div></div>
+    <div class="metric-card"><div class="metric-label">Max Drawdown</div><div class="metric-val neg">-5.3%</div></div>
+    <div class="metric-card"><div class="metric-label">Win Rate</div><div class="metric-val pos">62%</div></div>
+    <div class="metric-card"><div class="metric-label">Sharpe Ratio</div><div class="metric-val neu">0.64</div></div>
   </div>
 
   <div class="card">
@@ -779,9 +779,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
       <tbody><tr>
           <td>DOWNTREND</td><td>17d</td>
           <td><span class="badge badge-dn">BBOZ</span></td>
-          <td class="pos">+9.1%</td>
-          <td class="pos">+8.8%</td>
-          <td><span class="result result-win">Outperformed</span></td></tr><tr>
+          <td class="pos">+8.9%</td>
+          <td class="pos">+9.2%</td>
+          <td><span class="result result-lose">Underperformed</span></td></tr><tr>
           <td>NEUTRAL</td><td>15d</td>
           <td><span class="badge badge-nu">CASH</span></td>
           <td class="pos">+8.9%</td>
@@ -957,8 +957,8 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 </div>
 
 <script>
-const GEAR_PRICE = 34.58;
-const BBOZ_PRICE = 22.35;
+const GEAR_PRICE = 35.19;
+const BBOZ_PRICE = 22.0;
 
 // Password
 function unlock() {
@@ -1026,8 +1026,8 @@ function calcValue() {
 document.getElementById("t-price").addEventListener("input", calcValue);
 
 // Chart data
-var CD = {"labels": ["06 Nov", "07 Nov", "10 Nov", "11 Nov", "12 Nov", "13 Nov", "14 Nov", "17 Nov", "18 Nov", "19 Nov", "20 Nov", "21 Nov", "24 Nov", "25 Nov", "26 Nov", "27 Nov", "28 Nov", "01 Dec", "02 Dec", "03 Dec", "04 Dec", "05 Dec", "08 Dec", "09 Dec", "10 Dec", "11 Dec", "12 Dec", "15 Dec", "16 Dec", "17 Dec", "18 Dec", "19 Dec", "22 Dec", "23 Dec", "24 Dec", "29 Dec", "30 Dec", "31 Dec", "02 Jan", "05 Jan", "06 Jan", "07 Jan", "08 Jan", "09 Jan", "12 Jan", "13 Jan", "14 Jan", "15 Jan", "16 Jan", "19 Jan", "20 Jan", "21 Jan", "22 Jan", "23 Jan", "27 Jan", "28 Jan", "29 Jan", "30 Jan", "02 Feb", "03 Feb", "04 Feb", "05 Feb", "06 Feb", "09 Feb", "10 Feb", "11 Feb", "12 Feb", "13 Feb", "16 Feb", "17 Feb", "18 Feb", "19 Feb", "20 Feb", "23 Feb", "24 Feb", "25 Feb", "26 Feb", "27 Feb", "02 Mar", "03 Mar", "04 Mar", "05 Mar", "06 Mar", "09 Mar", "10 Mar", "11 Mar", "12 Mar", "13 Mar", "16 Mar", "17 Mar", "18 Mar", "19 Mar", "20 Mar", "23 Mar", "24 Mar", "25 Mar", "26 Mar", "27 Mar", "30 Mar", "31 Mar", "01 Apr", "02 Apr", "07 Apr", "08 Apr", "09 Apr", "10 Apr", "13 Apr", "14 Apr", "15 Apr", "16 Apr", "17 Apr", "20 Apr", "21 Apr", "22 Apr", "23 Apr", "24 Apr", "27 Apr", "28 Apr", "29 Apr", "30 Apr"], "closes": [8831.8, 8769.7, 8830.9, 8818.8, 8799.5, 8753.4, 8634.5, 8636.4, 8469.1, 8447.9, 8552.7, 8416.5, 8525.1, 8537.0, 8606.5, 8619.2, 8614.1, 8565.2, 8579.7, 8595.2, 8618.4, 8634.6, 8624.4, 8585.9, 8579.4, 8592.0, 8697.3, 8635.0, 8598.9, 8585.2, 8588.2, 8621.4, 8699.9, 8795.7, 8762.7, 8725.7, 8717.1, 8714.3, 8727.8, 8728.6, 8714.6, 8695.6, 8720.8, 8717.8, 8759.4, 8808.5, 8820.6, 8861.7, 8903.9, 8874.5, 8815.9, 8782.9, 8848.7, 8860.1, 8941.6, 8933.9, 8966.1, 8869.1, 8778.6, 8857.1, 8927.8, 8889.2, 8708.8, 8912.1, 8867.4, 9014.8, 9043.5, 8917.6, 8966.8, 8958.9, 9007.0, 9086.2, 9081.4, 9026.0, 9022.3, 9128.3, 9175.3, 9198.6, 9167.5, 9077.3, 8901.2, 8940.3, 8851.0, 8599.0, 8692.6, 8743.5, 8629.0, 8617.1, 8583.4, 8614.3, 8640.6, 8497.8, 8428.4, 8365.9, 8379.4, 8557.6, 8525.7, 8516.3, 8461.0, 8481.8, 8671.8, 8579.5, 8728.8, 8951.8, 8973.2, 8960.6, 8926.0, 8970.8, 8978.7, 8955.0, 8946.9, 8953.3, 8949.4, 8843.6, 8793.4, 8786.5, 8766.4, 8710.7, 8687.0, 8665.8], "sma20": [8955.38, 8945.95, 8943.35, 8939.32, 8929.75, 8914.0, 8895.96, 8876.19, 8844.91, 8815.8, 8791.8, 8761.67, 8735.15, 8711.37, 8695.39, 8682.07, 8668.68, 8652.2, 8640.5, 8630.16, 8619.49, 8612.74, 8602.41, 8590.77, 8579.76, 8571.69, 8574.83, 8574.76, 8581.25, 8588.12, 8589.89, 8600.14, 8608.88, 8621.81, 8629.62, 8634.95, 8640.1, 8647.55, 8654.96, 8661.63, 8666.44, 8669.49, 8674.31, 8680.9, 8689.9, 8700.73, 8706.89, 8718.23, 8733.48, 8747.94, 8759.33, 8767.4, 8774.84, 8778.06, 8787.0, 8797.41, 8809.86, 8817.6, 8820.14, 8826.57, 8837.23, 8846.91, 8846.31, 8856.02, 8861.42, 8871.74, 8882.88, 8885.68, 8888.82, 8893.04, 8902.6, 8917.76, 8929.4, 8937.69, 8941.73, 8951.45, 8961.91, 8978.38, 8997.83, 9008.84, 9007.51, 9010.06, 9017.17, 9001.52, 8992.78, 8979.21, 8958.49, 8943.46, 8924.29, 8907.06, 8888.74, 8859.32, 8826.67, 8793.67, 8761.52, 8732.99, 8700.51, 8666.39, 8631.07, 8601.29, 8589.82, 8571.78, 8565.67, 8583.31, 8597.34, 8608.2, 8623.05, 8640.73, 8660.5, 8677.53, 8692.85, 8715.62, 8741.67, 8765.56, 8786.26, 8797.7, 8809.74, 8819.46, 8830.76, 8839.96], "sma250": [8461.72, 8463.77, 8466.32, 8468.7, 8470.76, 8472.57, 8473.62, 8474.86, 8475.44, 8475.66, 8476.2, 8476.43, 8476.9, 8477.27, 8477.95, 8478.64, 8479.11, 8479.52, 8479.94, 8480.64, 8481.42, 8482.39, 8483.47, 8484.49, 8485.63, 8487.0, 8488.53, 8489.83, 8491.55, 8493.63, 8495.17, 8496.78, 8498.53, 8500.77, 8503.18, 8505.28, 8507.15, 8508.85, 8510.62, 8512.14, 8513.68, 8515.29, 8517.4, 8519.35, 8521.54, 8523.46, 8525.5, 8527.34, 8529.28, 8531.05, 8532.8, 8534.3, 8536.1, 8537.75, 8539.32, 8540.92, 8543.27, 8545.25, 8546.7, 8548.04, 8549.71, 8551.33, 8552.23, 8553.74, 8555.05, 8556.89, 8559.04, 8560.78, 8562.97, 8565.52, 8568.36, 8571.47, 8574.79, 8577.93, 8580.95, 8584.77, 8588.49, 8592.49, 8596.6, 8600.53, 8604.34, 8608.25, 8612.1, 8615.35, 8619.12, 8622.94, 8626.04, 8629.06, 8632.08, 8634.86, 8637.7, 8639.95, 8641.89, 8643.36, 8645.0, 8647.3, 8650.03, 8652.39, 8654.5, 8656.99, 8661.01, 8665.95, 8670.83, 8677.13, 8682.19, 8687.44, 8692.15, 8696.99, 8701.87, 8706.41, 8710.93, 8715.06, 8718.99, 8722.37, 8725.27, 8727.91, 8730.39, 8732.28, 8734.4, 8736.46], "rsi": [34.47, 26.25, 26.04, 28.79, 27.32, 25.7, 16.52, 18.0, 15.82, 16.3, 28.07, 22.63, 33.99, 35.3, 38.03, 41.56, 37.03, 35.47, 37.33, 40.55, 48.91, 49.88, 62.97, 61.2, 52.58, 72.28, 72.04, 61.11, 49.07, 45.84, 46.81, 57.19, 63.21, 68.73, 63.24, 58.05, 58.22, 62.15, 63.86, 63.04, 52.0, 57.79, 66.12, 68.05, 71.08, 72.17, 66.98, 60.97, 72.77, 74.6, 64.02, 58.97, 63.9, 64.76, 72.12, 73.75, 74.11, 62.55, 51.47, 53.57, 57.25, 51.87, 38.86, 51.79, 52.49, 60.09, 58.75, 52.34, 51.05, 51.05, 51.69, 59.1, 63.67, 57.79, 54.64, 61.02, 74.52, 68.57, 69.8, 54.46, 41.61, 51.49, 42.77, 32.78, 35.59, 33.87, 30.7, 31.89, 31.06, 26.28, 24.85, 20.37, 19.73, 20.18, 24.68, 33.64, 35.37, 45.24, 36.07, 33.67, 52.44, 48.04, 56.78, 63.34, 63.2, 70.49, 72.73, 78.08, 77.97, 71.67, 73.58, 74.55, 79.11, 69.58, 57.76, 64.82, 53.3, 20.02, 14.61, 14.31], "asx_norm": [100.0, 99.3, 99.99, 99.85, 99.63, 99.11, 97.77, 97.79, 95.89, 95.65, 96.84, 95.3, 96.53, 96.66, 97.45, 97.59, 97.54, 96.98, 97.15, 97.32, 97.58, 97.77, 97.65, 97.22, 97.14, 97.28, 98.48, 97.77, 97.36, 97.21, 97.24, 97.62, 98.51, 99.59, 99.22, 98.8, 98.7, 98.67, 98.82, 98.83, 98.67, 98.46, 98.74, 98.71, 99.18, 99.74, 99.87, 100.34, 100.82, 100.48, 99.82, 99.45, 100.19, 100.32, 101.24, 101.16, 101.52, 100.42, 99.4, 100.29, 101.09, 100.65, 98.61, 100.91, 100.4, 102.07, 102.4, 100.97, 101.53, 101.44, 101.98, 102.88, 102.83, 102.2, 102.16, 103.36, 103.89, 104.15, 103.8, 102.78, 100.79, 101.23, 100.22, 97.36, 98.42, 99.0, 97.7, 97.57, 97.19, 97.54, 97.84, 96.22, 95.43, 94.72, 94.88, 96.9, 96.53, 96.43, 95.8, 96.04, 98.19, 97.14, 98.83, 101.36, 101.6, 101.46, 101.07, 101.57, 101.66, 101.39, 101.3, 101.38, 101.33, 100.13, 99.57, 99.49, 99.26, 98.63, 98.36, 98.12], "gear_norm": [100.0, 98.5, 100.03, 100.03, 99.58, 98.39, 95.64, 95.73, 91.56, 91.09, 93.59, 90.4, 92.7, 92.95, 94.84, 94.92, 94.89, 93.7, 94.03, 94.31, 94.87, 95.2, 95.01, 94.01, 94.01, 94.17, 96.89, 95.23, 94.28, 93.9, 93.98, 94.87, 96.81, 99.03, 98.03, 97.17, 97.28, 97.06, 97.48, 97.34, 96.31, 96.56, 97.03, 96.92, 97.86, 99.03, 99.42, 100.36, 101.42, 100.55, 99.17, 98.28, 99.97, 100.17, 102.33, 101.91, 101.66, 100.31, 97.97, 100.0, 101.69, 100.69, 96.14, 100.17, 100.55, 103.66, 104.11, 101.36, 101.72, 102.36, 103.69, 105.66, 105.55, 104.22, 104.33, 106.77, 108.1, 108.63, 108.71, 105.8, 101.75, 103.47, 101.17, 94.95, 97.39, 98.61, 95.92, 95.62, 94.81, 95.59, 96.2, 92.7, 90.98, 89.35, 89.76, 93.42, 93.15, 93.06, 91.65, 92.09, 96.56, 94.53, 97.67, 103.44, 103.63, 103.39, 102.5, 103.77, 103.88, 103.25, 103.02, 103.16, 102.94, 100.44, 99.25, 99.17, 98.39, 97.11, 96.53, 95.95], "bboz_norm": [100.0, 101.62, 100.09, 100.18, 100.74, 101.85, 104.62, 104.43, 109.05, 109.88, 106.97, 110.71, 107.99, 107.53, 105.36, 105.26, 105.36, 106.88, 106.42, 106.19, 105.63, 105.08, 105.45, 106.6, 106.79, 106.37, 103.46, 105.26, 106.46, 106.93, 106.88, 105.77, 103.69, 101.06, 102.12, 103.09, 103.0, 103.42, 102.95, 102.95, 104.29, 104.16, 103.51, 103.65, 102.49, 101.15, 100.88, 99.86, 98.57, 99.54, 101.2, 102.22, 100.37, 100.14, 97.78, 98.11, 98.43, 99.91, 102.45, 100.46, 98.48, 99.49, 104.8, 100.32, 99.86, 96.4, 95.71, 99.08, 98.75, 97.97, 96.4, 94.37, 94.41, 95.84, 95.71, 93.26, 91.97, 91.46, 91.27, 94.28, 98.38, 96.63, 98.94, 105.12, 102.03, 100.69, 103.88, 104.34, 105.03, 104.25, 103.51, 107.8, 109.65, 111.31, 110.9, 106.69, 107.02, 107.39, 108.96, 108.45, 103.37, 105.54, 101.89, 95.29, 95.15, 95.48, 96.4, 94.97, 94.97, 95.66, 95.89, 95.75, 95.75, 98.48, 99.72, 99.86, 100.55, 101.99, 102.59, 103.19]};
-var BT = {"total_return": 8.7, "cagr": 4.2, "max_dd": -6.3, "win_rate": 69.0, "sharpe": 0.54, "labels": ["Apr '25", "May '25", "May '25", "May '25", "May '25", "May '25", "Jun '25", "Jun '25", "Jun '25", "Jun '25", "Jul '25", "Jul '25", "Jul '25", "Jul '25", "Aug '25", "Aug '25", "Aug '25", "Aug '25", "Sep '25", "Sep '25", "Sep '25", "Sep '25", "Sep '25", "Oct '25", "Oct '25", "Oct '25", "Oct '25", "Nov '25", "Nov '25", "Nov '25", "Nov '25", "Dec '25", "Dec '25", "Dec '25", "Dec '25", "Dec '25", "Jan '26", "Jan '26", "Jan '26", "Jan '26", "Feb '26", "Feb '26", "Feb '26", "Feb '26", "Mar '26", "Mar '26", "Mar '26", "Mar '26", "Apr '26", "Apr '26", "Apr '26", "Apr '26"], "equity": [99643, 100783, 100557, 101908, 101719, 102369, 103082, 103026, 101046, 102029, 102409, 102006, 103424, 103216, 102026, 104694, 105907, 105430, 104369, 103261, 103139, 102426, 103355, 105115, 103266, 105208, 105028, 102597, 101725, 99652, 101575, 101608, 101956, 102425, 103352, 102868, 102561, 104518, 103561, 103055, 101712, 104357, 106025, 107133, 103242, 105384, 106993, 106386, 107123, 110488, 109649, 108560], "bh_equity": [103968, 107488, 107399, 108867, 109092, 110055, 111112, 111538, 110579, 111459, 112072, 111825, 113101, 113486, 113043, 115406, 116900, 117071, 116487, 115468, 115513, 114963, 115640, 117188, 115901, 117847, 118156, 116058, 115224, 112686, 111234, 111757, 112530, 112668, 113515, 113703, 113788, 115626, 115456, 115723, 113631, 116355, 118493, 120022, 115486, 112435, 109972, 111119, 113892, 117050, 116770, 113656], "drawdowns": [-0.36, 0.0, -0.22, 0.0, -0.58, 0.0, -0.58, -1.05, -2.95, -2.0, -1.64, -2.02, -1.74, -1.93, -3.07, -0.53, 0.0, -0.86, -1.85, -2.9, -3.01, -3.68, -2.81, -1.15, -2.89, -1.07, -1.23, -3.52, -4.34, -6.29, -4.48, -4.45, -4.12, -3.68, -2.81, -3.27, -3.55, -1.71, -2.61, -3.09, -4.35, -1.87, -0.3, 0.0, -3.63, -1.63, -0.13, -1.31, -0.63, -0.31, -1.06, -2.05], "regime_rows": [{"regime": "DOWNTREND", "days": 17, "sys_ret": 9.1, "asx_ret": 8.8}, {"regime": "NEUTRAL", "days": 15, "sys_ret": 8.9, "asx_ret": 8.6}, {"regime": "STRONG UPTREND", "days": 135, "sys_ret": 8.8, "asx_ret": 8.6}, {"regime": "UPTREND", "days": 86, "sys_ret": 8.3, "asx_ret": 8.4}, {"regime": "STRONG DOWNTREND", "days": 5, "sys_ret": -0.4, "asx_ret": 0.6}], "regime_transitions": [{"date": "20 Mar 2026", "from": "DOWNTREND", "to": "STRONG DOWNTREND", "price": 8428}, {"date": "25 Mar 2026", "from": "STRONG DOWNTREND", "to": "DOWNTREND", "price": 8558}, {"date": "30 Mar 2026", "from": "DOWNTREND", "to": "STRONG DOWNTREND", "price": 8461}, {"date": "01 Apr 2026", "from": "STRONG DOWNTREND", "to": "NEUTRAL", "price": 8672}, {"date": "02 Apr 2026", "from": "NEUTRAL", "to": "DOWNTREND", "price": 8580}, {"date": "07 Apr 2026", "from": "DOWNTREND", "to": "NEUTRAL", "price": 8729}, {"date": "08 Apr 2026", "from": "NEUTRAL", "to": "STRONG UPTREND", "price": 8952}, {"date": "22 Apr 2026", "from": "STRONG UPTREND", "to": "UPTREND", "price": 8844}, {"date": "23 Apr 2026", "from": "UPTREND", "to": "NEUTRAL", "price": 8793}, {"date": "28 Apr 2026", "from": "NEUTRAL", "to": "DOWNTREND", "price": 8711}]};
+var CD = {"labels": ["07 Nov", "10 Nov", "11 Nov", "12 Nov", "13 Nov", "14 Nov", "17 Nov", "18 Nov", "19 Nov", "20 Nov", "21 Nov", "24 Nov", "25 Nov", "26 Nov", "27 Nov", "28 Nov", "01 Dec", "02 Dec", "03 Dec", "04 Dec", "05 Dec", "08 Dec", "09 Dec", "10 Dec", "11 Dec", "12 Dec", "15 Dec", "16 Dec", "17 Dec", "18 Dec", "19 Dec", "22 Dec", "23 Dec", "24 Dec", "29 Dec", "30 Dec", "31 Dec", "02 Jan", "05 Jan", "06 Jan", "07 Jan", "08 Jan", "09 Jan", "12 Jan", "13 Jan", "14 Jan", "15 Jan", "16 Jan", "19 Jan", "20 Jan", "21 Jan", "22 Jan", "23 Jan", "27 Jan", "28 Jan", "29 Jan", "30 Jan", "02 Feb", "03 Feb", "04 Feb", "05 Feb", "06 Feb", "09 Feb", "10 Feb", "11 Feb", "12 Feb", "13 Feb", "16 Feb", "17 Feb", "18 Feb", "19 Feb", "20 Feb", "23 Feb", "24 Feb", "25 Feb", "26 Feb", "27 Feb", "02 Mar", "03 Mar", "04 Mar", "05 Mar", "06 Mar", "09 Mar", "10 Mar", "11 Mar", "12 Mar", "13 Mar", "16 Mar", "17 Mar", "18 Mar", "19 Mar", "20 Mar", "23 Mar", "24 Mar", "25 Mar", "26 Mar", "27 Mar", "30 Mar", "31 Mar", "01 Apr", "02 Apr", "07 Apr", "08 Apr", "09 Apr", "10 Apr", "13 Apr", "14 Apr", "15 Apr", "16 Apr", "17 Apr", "20 Apr", "21 Apr", "22 Apr", "23 Apr", "24 Apr", "27 Apr", "28 Apr", "29 Apr", "30 Apr", "01 May"], "closes": [8769.7, 8830.9, 8818.8, 8799.5, 8753.4, 8634.5, 8636.4, 8469.1, 8447.9, 8552.7, 8416.5, 8525.1, 8537.0, 8606.5, 8619.2, 8614.1, 8565.2, 8579.7, 8595.2, 8618.4, 8634.6, 8624.4, 8585.9, 8579.4, 8592.0, 8697.3, 8635.0, 8598.9, 8585.2, 8588.2, 8621.4, 8699.9, 8795.7, 8762.7, 8725.7, 8717.1, 8714.3, 8727.8, 8728.6, 8714.6, 8695.6, 8720.8, 8717.8, 8759.4, 8808.5, 8820.6, 8861.7, 8903.9, 8874.5, 8815.9, 8782.9, 8848.7, 8860.1, 8941.6, 8933.9, 8966.1, 8869.1, 8778.6, 8857.1, 8927.8, 8889.2, 8708.8, 8912.1, 8867.4, 9014.8, 9043.5, 8917.6, 8966.8, 8958.9, 9007.0, 9086.2, 9081.4, 9026.0, 9022.3, 9128.3, 9175.3, 9198.6, 9167.5, 9077.3, 8901.2, 8940.3, 8851.0, 8599.0, 8692.6, 8743.5, 8629.0, 8617.1, 8583.4, 8614.3, 8640.6, 8497.8, 8428.4, 8365.9, 8379.4, 8557.6, 8525.7, 8516.3, 8461.0, 8481.8, 8671.8, 8579.5, 8728.8, 8951.8, 8973.2, 8960.6, 8926.0, 8970.8, 8978.7, 8955.0, 8946.9, 8953.3, 8949.4, 8843.6, 8793.4, 8786.5, 8766.4, 8710.7, 8687.0, 8665.8, 8729.8], "sma20": [8945.95, 8943.35, 8939.32, 8929.75, 8914.0, 8895.96, 8876.19, 8844.91, 8815.8, 8791.8, 8761.67, 8735.15, 8711.37, 8695.39, 8682.07, 8668.68, 8652.2, 8640.5, 8630.16, 8619.49, 8612.74, 8602.41, 8590.77, 8579.76, 8571.69, 8574.83, 8574.76, 8581.25, 8588.12, 8589.89, 8600.14, 8608.88, 8621.81, 8629.62, 8634.95, 8640.1, 8647.55, 8654.96, 8661.63, 8666.44, 8669.49, 8674.31, 8680.9, 8689.9, 8700.73, 8706.89, 8718.23, 8733.48, 8747.94, 8759.33, 8767.4, 8774.84, 8778.06, 8787.0, 8797.41, 8809.86, 8817.6, 8820.14, 8826.57, 8837.23, 8846.91, 8846.31, 8856.02, 8861.42, 8871.74, 8882.88, 8885.68, 8888.82, 8893.04, 8902.6, 8917.76, 8929.4, 8937.69, 8941.73, 8951.45, 8961.91, 8978.38, 8997.83, 9008.84, 9007.51, 9010.06, 9017.17, 9001.52, 8992.78, 8979.21, 8958.49, 8943.46, 8924.29, 8907.06, 8888.74, 8859.32, 8826.67, 8793.67, 8761.52, 8732.99, 8700.51, 8666.39, 8631.07, 8601.29, 8589.82, 8571.78, 8565.67, 8583.31, 8597.34, 8608.2, 8623.05, 8640.73, 8660.5, 8677.53, 8692.85, 8715.62, 8741.67, 8765.56, 8786.26, 8797.7, 8809.74, 8819.46, 8830.76, 8839.96, 8842.86], "sma250": [8463.77, 8466.32, 8468.7, 8470.76, 8472.57, 8473.62, 8474.86, 8475.44, 8475.66, 8476.2, 8476.43, 8476.9, 8477.27, 8477.95, 8478.64, 8479.11, 8479.52, 8479.94, 8480.64, 8481.42, 8482.39, 8483.47, 8484.49, 8485.63, 8487.0, 8488.53, 8489.83, 8491.55, 8493.63, 8495.17, 8496.78, 8498.53, 8500.77, 8503.18, 8505.28, 8507.15, 8508.85, 8510.62, 8512.14, 8513.68, 8515.29, 8517.4, 8519.35, 8521.54, 8523.46, 8525.5, 8527.34, 8529.28, 8531.05, 8532.8, 8534.3, 8536.1, 8537.75, 8539.32, 8540.92, 8543.27, 8545.25, 8546.7, 8548.04, 8549.71, 8551.33, 8552.23, 8553.74, 8555.05, 8556.89, 8559.04, 8560.78, 8562.97, 8565.52, 8568.36, 8571.47, 8574.79, 8577.93, 8580.95, 8584.77, 8588.49, 8592.49, 8596.6, 8600.53, 8604.34, 8608.25, 8612.1, 8615.35, 8619.12, 8622.94, 8626.04, 8629.06, 8632.08, 8634.86, 8637.7, 8639.95, 8641.89, 8643.36, 8645.0, 8647.3, 8650.03, 8652.39, 8654.5, 8656.99, 8661.01, 8665.95, 8670.83, 8677.13, 8682.19, 8687.44, 8692.15, 8696.99, 8701.87, 8706.41, 8710.93, 8715.06, 8718.99, 8722.37, 8725.27, 8727.91, 8730.39, 8732.28, 8734.4, 8736.46, 8738.66], "rsi": [26.25, 26.04, 28.79, 27.32, 25.7, 16.52, 18.0, 15.82, 16.3, 28.07, 22.63, 33.99, 35.3, 38.03, 41.56, 37.03, 35.47, 37.33, 40.55, 48.91, 49.88, 62.97, 61.2, 52.58, 72.28, 72.04, 61.11, 49.07, 45.84, 46.81, 57.19, 63.21, 68.73, 63.24, 58.05, 58.22, 62.15, 63.86, 63.04, 52.0, 57.79, 66.12, 68.05, 71.08, 72.17, 66.98, 60.97, 72.77, 74.6, 64.02, 58.97, 63.9, 64.76, 72.12, 73.75, 74.11, 62.55, 51.47, 53.57, 57.25, 51.87, 38.86, 51.79, 52.49, 60.09, 58.75, 52.34, 51.05, 51.05, 51.69, 59.1, 63.67, 57.79, 54.64, 61.02, 74.52, 68.57, 69.8, 54.46, 41.61, 51.49, 42.77, 32.78, 35.59, 33.87, 30.7, 31.89, 31.06, 26.28, 24.85, 20.37, 19.73, 20.18, 24.68, 33.64, 35.37, 45.24, 36.07, 33.67, 52.44, 48.04, 56.78, 63.34, 63.2, 70.49, 72.73, 78.08, 77.97, 71.67, 73.58, 74.55, 79.11, 69.58, 57.76, 64.82, 53.3, 20.02, 14.61, 14.31, 27.83], "asx_norm": [100.0, 100.7, 100.56, 100.34, 99.81, 98.46, 98.48, 96.57, 96.33, 97.53, 95.97, 97.21, 97.35, 98.14, 98.28, 98.23, 97.67, 97.83, 98.01, 98.27, 98.46, 98.34, 97.9, 97.83, 97.97, 99.17, 98.46, 98.05, 97.9, 97.93, 98.31, 99.2, 100.3, 99.92, 99.5, 99.4, 99.37, 99.52, 99.53, 99.37, 99.16, 99.44, 99.41, 99.88, 100.44, 100.58, 101.05, 101.53, 101.2, 100.53, 100.15, 100.9, 101.03, 101.96, 101.87, 102.24, 101.13, 100.1, 101.0, 101.8, 101.36, 99.31, 101.62, 101.11, 102.79, 103.12, 101.69, 102.25, 102.16, 102.71, 103.61, 103.55, 102.92, 102.88, 104.09, 104.63, 104.89, 104.54, 103.51, 101.5, 101.95, 100.93, 98.05, 99.12, 99.7, 98.4, 98.26, 97.88, 98.23, 98.53, 96.9, 96.11, 95.4, 95.55, 97.58, 97.22, 97.11, 96.48, 96.72, 98.88, 97.83, 99.53, 102.08, 102.32, 102.18, 101.78, 102.29, 102.38, 102.11, 102.02, 102.09, 102.05, 100.84, 100.27, 100.19, 99.96, 99.33, 99.06, 98.82, 99.55], "gear_norm": [100.0, 101.55, 101.55, 101.1, 99.89, 97.1, 97.18, 92.96, 92.48, 95.01, 91.77, 94.11, 94.37, 96.28, 96.37, 96.34, 95.13, 95.46, 95.75, 96.31, 96.65, 96.45, 95.44, 95.44, 95.61, 98.37, 96.68, 95.72, 95.32, 95.41, 96.31, 98.28, 100.54, 99.52, 98.65, 98.76, 98.54, 98.96, 98.82, 97.77, 98.03, 98.51, 98.39, 99.35, 100.54, 100.93, 101.89, 102.96, 102.08, 100.68, 99.77, 101.49, 101.69, 103.89, 103.46, 103.21, 101.83, 99.46, 101.52, 103.24, 102.23, 97.61, 101.69, 102.08, 105.24, 105.69, 102.9, 103.27, 103.92, 105.27, 107.27, 107.15, 105.8, 105.92, 108.39, 109.75, 110.28, 110.37, 107.41, 103.3, 105.04, 102.7, 96.39, 98.87, 100.11, 97.38, 97.07, 96.25, 97.04, 97.66, 94.11, 92.37, 90.7, 91.13, 94.85, 94.56, 94.48, 93.04, 93.49, 98.03, 95.97, 99.15, 105.01, 105.21, 104.96, 104.06, 105.35, 105.46, 104.82, 104.59, 104.73, 104.51, 101.97, 100.76, 100.68, 99.89, 98.59, 98.0, 97.41, 99.13], "bboz_norm": [100.0, 98.5, 98.59, 99.14, 100.23, 102.95, 102.77, 107.31, 108.13, 105.27, 108.95, 106.27, 105.82, 103.68, 103.59, 103.68, 105.18, 104.73, 104.5, 103.95, 103.41, 103.77, 104.91, 105.09, 104.68, 101.82, 103.59, 104.77, 105.22, 105.18, 104.09, 102.04, 99.45, 100.5, 101.45, 101.36, 101.77, 101.32, 101.32, 102.64, 102.5, 101.86, 102.0, 100.86, 99.55, 99.27, 98.27, 97.0, 97.96, 99.59, 100.59, 98.77, 98.55, 96.23, 96.55, 96.87, 98.32, 100.82, 98.86, 96.91, 97.91, 103.13, 98.73, 98.27, 94.87, 94.18, 97.5, 97.18, 96.41, 94.87, 92.87, 92.91, 94.32, 94.18, 91.78, 90.5, 90.0, 89.82, 92.78, 96.82, 95.09, 97.36, 103.45, 100.41, 99.09, 102.23, 102.68, 103.36, 102.59, 101.86, 106.09, 107.91, 109.54, 109.13, 105.0, 105.32, 105.68, 107.22, 106.72, 101.73, 103.86, 100.27, 93.78, 93.64, 93.96, 94.87, 93.46, 93.46, 94.14, 94.37, 94.23, 94.23, 96.91, 98.14, 98.27, 98.96, 100.36, 100.95, 101.54, 99.95]};
+var BT = {"total_return": 8.6, "cagr": 4.2, "max_dd": -5.3, "win_rate": 62.0, "sharpe": 0.64, "labels": ["Apr '25", "May '25", "May '25", "May '25", "May '25", "Jun '25", "Jun '25", "Jun '25", "Jun '25", "Jul '25", "Jul '25", "Jul '25", "Jul '25", "Jul '25", "Aug '25", "Aug '25", "Aug '25", "Aug '25", "Sep '25", "Sep '25", "Sep '25", "Sep '25", "Sep '25", "Oct '25", "Oct '25", "Oct '25", "Oct '25", "Nov '25", "Nov '25", "Nov '25", "Nov '25", "Dec '25", "Dec '25", "Dec '25", "Dec '25", "Jan '26", "Jan '26", "Jan '26", "Jan '26", "Feb '26", "Feb '26", "Feb '26", "Feb '26", "Mar '26", "Mar '26", "Mar '26", "Mar '26", "Mar '26", "Apr '26", "Apr '26", "Apr '26", "Apr '26"], "equity": [99763, 100300, 100884, 101406, 101972, 102219, 104487, 103142, 102838, 102309, 102688, 103403, 103851, 103602, 104295, 105530, 104971, 104995, 104118, 103141, 103725, 103332, 103489, 104912, 103831, 106444, 104484, 102156, 101921, 101105, 101939, 102073, 101793, 102290, 105113, 103378, 102757, 105446, 104030, 102297, 104388, 105236, 105247, 106947, 105312, 105909, 108188, 107456, 110979, 110910, 108664, 109037], "bh_equity": [105643, 107766, 108766, 109580, 110451, 111152, 113439, 112832, 113020, 112830, 113485, 114008, 114628, 114990, 115859, 117317, 117521, 118041, 117579, 116296, 117276, 116856, 116895, 118321, 117563, 120143, 119057, 116431, 116498, 111879, 112776, 113340, 113422, 113593, 116193, 115296, 115164, 117622, 117044, 115967, 117731, 118453, 119235, 121105, 113595, 113389, 110515, 111772, 118255, 118611, 116826, 114757], "drawdowns": [-0.24, -0.83, -0.26, -0.85, -0.69, -0.5, 0.0, -1.29, -1.58, -2.08, -1.72, -1.04, -1.68, -1.92, -1.26, -0.09, -1.24, -1.62, -2.44, -3.35, -2.81, -3.18, -3.03, -1.7, -2.71, -0.26, -2.1, -4.28, -4.5, -5.26, -4.48, -4.36, -4.62, -4.15, -1.51, -3.13, -3.71, -1.2, -2.52, -4.15, -2.19, -1.39, -1.38, -0.53, -2.05, -1.5, 0.0, -0.68, 0.0, -0.28, -2.3, -1.97], "regime_rows": [{"regime": "DOWNTREND", "days": 17, "sys_ret": 8.9, "asx_ret": 9.2}, {"regime": "NEUTRAL", "days": 15, "sys_ret": 8.9, "asx_ret": 8.6}, {"regime": "STRONG UPTREND", "days": 135, "sys_ret": 8.8, "asx_ret": 8.6}, {"regime": "UPTREND", "days": 86, "sys_ret": 8.3, "asx_ret": 8.4}, {"regime": "STRONG DOWNTREND", "days": 5, "sys_ret": -0.4, "asx_ret": 0.6}], "regime_transitions": [{"date": "20 Mar 2026", "from": "DOWNTREND", "to": "STRONG DOWNTREND", "price": 8428}, {"date": "25 Mar 2026", "from": "STRONG DOWNTREND", "to": "DOWNTREND", "price": 8558}, {"date": "30 Mar 2026", "from": "DOWNTREND", "to": "STRONG DOWNTREND", "price": 8461}, {"date": "01 Apr 2026", "from": "STRONG DOWNTREND", "to": "NEUTRAL", "price": 8672}, {"date": "02 Apr 2026", "from": "NEUTRAL", "to": "DOWNTREND", "price": 8580}, {"date": "07 Apr 2026", "from": "DOWNTREND", "to": "NEUTRAL", "price": 8729}, {"date": "08 Apr 2026", "from": "NEUTRAL", "to": "STRONG UPTREND", "price": 8952}, {"date": "22 Apr 2026", "from": "STRONG UPTREND", "to": "UPTREND", "price": 8844}, {"date": "23 Apr 2026", "from": "UPTREND", "to": "NEUTRAL", "price": 8793}, {"date": "28 Apr 2026", "from": "NEUTRAL", "to": "DOWNTREND", "price": 8711}]};
 
 var baseOpts = {
   responsive: true, maintainAspectRatio: false,
